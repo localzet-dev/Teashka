@@ -1,0 +1,63 @@
+{
+  "name": "localzet-dev/teashka",
+  "description": "Telegram-бот помощник студента",
+  "type": "project",
+  "license": "AGPL-3.0-or-later",
+  "authors": [
+    {
+      "role": "PHP Developer",
+      "name": "Ivan Zorin",
+      "email": "creator@localzet.com"
+    },
+    {
+      "role": "PHP Developer",
+      "name": "Yurtsevich Alina",
+      "email": "alinochka3457@gmail.com"
+    },
+    {
+      "role": "Pyton Developer",
+      "name": "Kochneva Elizabeth",
+      "email": "liza.weta@mail.ru"
+    },
+    {
+      "role": "ML Engineer",
+      "name": "Ruban Anton",
+      "email": "suntineo@gmail.com"
+    }
+  ],
+  "support": {
+    "email": "teashka@localzet.com",
+    "source": "https://github.com/localzet-dev/Teashka",
+    "chat": "https://t.me/TeashkaBot"
+  },
+  "funding": [
+    {
+      "type": "other",
+      "url": "https://donate.localzet.com"
+    }
+  ],
+  "require": {
+    "php": "^8.2",
+    "triangle/engine": "^3.0",
+    "google/cloud-dialogflow": "^1.4"
+  },
+  "autoload": {
+    "psr-4": {
+      "": "./"
+    },
+    "files": [
+      "support/helpers.php"
+    ]
+  },
+  "scripts": {
+    "post-package-install": [
+      "support\\Plugin::install"
+    ],
+    "post-package-update": [
+      "support\\Plugin::update"
+    ],
+    "pre-package-uninstall": [
+      "support\\Plugin::uninstall"
+    ]
+  }
+}

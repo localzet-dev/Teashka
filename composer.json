@@ -1,8 +1,24 @@
 {
   "name": "localzet-dev/teashka",
-  "description": "Telegram-бот помощник студента",
+  "require": {
+    "php": "^8.2",
+    "triangle/engine": "^3.0",
+    "google/cloud-dialogflow": "^1.4",
+    "irazasyed/telegram-bot-sdk": "^3.9"
+  },
   "type": "project",
-  "license": "AGPL-3.0-or-later",
+  "autoload": {
+    "psr-4": {
+      "": "./"
+    },
+    "files": [
+      "support/helpers.php"
+    ]
+  },
+  "notification-url": "https://packagist.org/downloads/",
+  "license": [
+    "AGPL-3.0-or-later"
+  ],
   "authors": [
     {
       "role": "PHP Developer",
@@ -15,7 +31,7 @@
       "email": "alinochka3457@gmail.com"
     },
     {
-      "role": "Pyton Developer",
+      "role": "Python Developer",
       "name": "Kochneva Elizabeth",
       "email": "liza.weta@mail.ru"
     },
@@ -25,10 +41,12 @@
       "email": "suntineo@gmail.com"
     }
   ],
+  "description": "Telegram-бот помощник студента",
+  "homepage": "https://t.me/TeashkaBot",
   "support": {
     "email": "teashka@localzet.com",
     "source": "https://github.com/localzet-dev/Teashka",
-    "chat": "https://t.me/TeashkaBot"
+    "chat": "https://t.me/localzet"
   },
   "funding": [
     {
@@ -36,19 +54,6 @@
       "url": "https://donate.localzet.com"
     }
   ],
-  "require": {
-    "php": "^8.2",
-    "triangle/engine": "^3.0",
-    "google/cloud-dialogflow": "^1.4"
-  },
-  "autoload": {
-    "psr-4": {
-      "": "./"
-    },
-    "files": [
-      "support/helpers.php"
-    ]
-  },
   "scripts": {
     "post-package-install": [
       "support\\Plugin::install"

@@ -27,10 +27,13 @@ namespace support;
 
 use AllowDynamicProperties;
 
+use Telegram\Bot\Objects\Update;
+
 /**
  * Class Request
  */
 #[AllowDynamicProperties]
 class Request extends \Triangle\Engine\Http\Request
 {
+    public ?Update $input;
 }

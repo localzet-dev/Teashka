@@ -26,7 +26,9 @@
 namespace support;
 
 use AllowDynamicProperties;
-
+use app\model\User;
+use Telegram\Bot\Objects\Chat;
+use Telegram\Bot\Objects\Message;
 use Telegram\Bot\Objects\Update;
 
 /**
@@ -35,5 +37,8 @@ use Telegram\Bot\Objects\Update;
 #[AllowDynamicProperties]
 class Request extends \Triangle\Engine\Http\Request
 {
+    public ?User $user;
+    public ?Chat $chat;
     public ?Update $input;
+    public ?Message $message;
 }

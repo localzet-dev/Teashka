@@ -35,10 +35,9 @@ use localzet\Server\Server;
   <meta name="reply-to" content="<?= $reply_to ?>" />
 
   <!-- About System -->
-  <meta name="project" content="<?= $name ?>" domain="<?= config('app.domain', '!notSET!') ?>"
-        assets="<?= config('app.src', '!notSET!') ?>"/>
-  <meta name="generator" content="Triangle Framework" debug="<?= config('app.debug', '!notSET!') ?>"/>
-  <meta name="server" version="<?= config('app.headers.server', 'Localzet Server') ?>"/>
+  <meta name="project" content="<?= $name ?>" domain="<?= config('app.domain', '!notSET!') ?>" assets="<?= config('app.src', '!notSET!') ?>" />
+  <meta name="generator" content="Triangle Framework" debug="<?= config('app.debug', '!notSET!') ?>" />
+  <meta name="server" version="<?= config('app.headers.server', 'Localzet Server') ?>" />
 
   <!-- Cache&Content -->
   <meta http-equiv="Expires" content="60" />
@@ -61,33 +60,13 @@ use localzet\Server\Server;
   <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff00">
 
   <!-- Fonts -->
-   <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Nunito:100,200,300,400,500,600,700,800,900" />
-
-  <!--Theme-->
-  <script>
-    var AppInfo = <?= json($AppInfo) ?>;
-    var globalDebug = <?= config('app.debug') ? 'true' : 'false' ?>;
-    var defaultThemeMode = "dark";
-    var themeMode;
-    if (document.documentElement) {
-      if (document.documentElement.hasAttribute("data-theme-mode")) {
-        themeMode = document.documentElement.getAttribute("data-theme-mode");
-      } else {
-        if (localStorage.getItem("data-theme") !== null) {
-          themeMode = localStorage.getItem("data-theme");
-        } else {
-          themeMode = defaultThemeMode;
-        }
-      }
-      if (themeMode === "system") {
-        console.log(window.MediaDeviceInfo);
-        themeMode = window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
-      }
-      document.documentElement.setAttribute("data-theme", themeMode);
-      AppInfo.theme = themeMode;
+  <link rel="stylesheet" type="text/css" href="https://fonts.googleapis.com/css?family=Nunito:100,200,300,400,500,600,700,800,900" />
+  <style>
+    * {
+      font-family: 'Nunito';
     }
-    if (globalDebug) console.info("Запуск \"" + AppInfo.name + "\" \n", AppInfo);
-  </script>
+  </style>
+
 </head>
 
 <body>

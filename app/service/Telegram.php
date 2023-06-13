@@ -2,41 +2,37 @@
 
 namespace app\service;
 
+use Exception;
 use support\TelegramBotApi;
 use Telegram\Bot\Events\UpdateWasReceived;
+use Telegram\Bot\FileUpload\InputFile;
+use Telegram\Bot\Objects\Message;
 use Telegram\Bot\Objects\Update;
-use Telegram\Bot\Objects\Voice;
 
 class Telegram
 {
+    public static TelegramBotApi $api;
+
     /**
-     * Фразы для бота.
+     * Загружает голосовое сообщение из Telegram и сохраняет его на сервер.
+     *
+     * @param Message $message Объект сообщения.
+     * @return string Путь к сохраненному голосовому сообщению.
+     * @throws Exception Если произошла ошибка при загрузке голосового сообщения.
      */
-    public const PHRASES = [
-        'welcome' => 'Привет! Я - бот помощник для студентов ДГТУ. Для использования пришли свой E-Mail (логин), привязанный к edu.donstu.ru ',
-
-        'already_exists_user' => 'Этот аккаунт уже привязан! ',
-
-        'start_verify' => 'Я отправил ссылку для авторизации на твой аккаунт. ',
-
-        'check_edumail' => 'Проверь внутреннюю почту (https://edu.donstu.ru/WebApp/#/mail/all) ',
-        'edumail_theme' => 'Тишка: Авторизация',
-        'edumail_message' => 'Привет! Твоя ссылка для авторизации: [%url%](%url%). Так я смогу убедиться, что Telegram-аккаунт (%name%) принадлежит тебе :)\nВнимание!!! Если ты НЕ пытался войти в бота - НЕ ПЕРЕХОДИ ПО ССЫЛКЕ, это даст пользователю доступ к твоим данным!',
-
-        'account_already_activated' => 'Аккаунт уже активирован!',
-        'account_activated_web' => 'Аккаунт активирован. <a href="https://t.me/TeashkaBot">Вернитесь в телеграм</a>',
-        'account_activated_tg' => 'Поздравляю! Аккаунт активирован, теперь тебе доступны все функции :)',
-
-        'contact_support' => 'Обратитесь к администратору <a href="https://t.me/GeneralRust">@GeneralRust</a>'
-    ];
-
-    public static function downloadVoice(Voice $voice)
+    public static function downloadVoice(Message $message): string
     {
-        $fileId = $voice->fileId;
-        $savePath = base_path() . '/resources/voices/' . $fileId . '.wav';
-        $resp = self::api()->downloadFile($fileId, $savePath);
-        self::sendMessage($resp);
-        self::sendMessage($savePath);
+        $filePath = self::api()->getFile(['file_id' => $message->voice->fileId])->filePath;
+        $fileUrl = 'https://api.telegram.org/file/bot' . config('telegram.token') . '/' . $filePath;
+        $savePath = base_path("resources/voices/{$message->chat->id}_" . basename($filePath));
+
+        $fileContent = file_get_contents($fileUrl);
+        if ($fileContent !== false && file_put_contents($savePath, $fileContent) !== false) {
+            return $savePath;
+        } else {
+            self::sendMessage("Ошибка загрузки голосового сообщения");
+            throw new Exception('Ошибка загрузки голосового сообщения');
+        }
     }
 
     /**
@@ -45,29 +41,46 @@ class Telegram
      * @param string $text Текст сообщения.
      * @param int|null $chat_id Идентификатор чата. Если не указан, будет использован идентификатор текущего чата.
      * @param array $options Дополнительные параметры сообщения.
-     *
      * @return void
      */
-    public static function sendMessage($text, $chat_id = null, array $options = []): void
+    public static function sendMessage(string $text, ?int $chat_id = null, array $options = []): void
     {
-        if (!$chat_id) {
-            $chat_id = request()->chat->id;
-        }
+        $chat_id = $chat_id ?? self::getCurrentChatId();
 
         $messageData = [
             'chat_id' => $chat_id,
             'text' => $text,
-            'parse_mode' => !empty($options['parse_mode']) ? $options['parse_mode'] : 'HTML',
+            'parse_mode' => $options['parse_mode'] ?? 'HTML',
         ];
 
         self::api()->sendMessage(array_merge($messageData, $options));
+    }
+
+
+    /**
+     * Отправляет фото через Telegram API.
+     *
+     * @param string $photo Фото.
+     * @param int|null $chat_id Идентификатор чата. Если не указан, будет использован идентификатор текущего чата.
+     * @param array $options Дополнительные параметры сообщения.
+     * @return void
+     */
+    public static function sendPhoto(string $photo, ?int $chat_id = null, array $options = []): void
+    {
+        $chat_id = $chat_id ?? self::getCurrentChatId();
+
+        $messageData = [
+            'chat_id' => $chat_id,
+            'photo' =>  InputFile::create($photo),
+        ];
+
+        self::api()->sendPhoto(array_merge($messageData, $options));
     }
 
     /**
      * Разбирает входные данные запроса и создает объект Update.
      *
      * @param mixed $request Запрос.
-     *
      * @return Update Объект Update.
      */
     public static function parseInput($request): Update
@@ -83,10 +96,24 @@ class Telegram
     /**
      * Возвращает объект TelegramBotApi для выполнения запросов к Telegram API.
      *
-     * @return \Telegram\Bot\Api Объект TelegramBotApi.
+     * @return TelegramBotApi Объект TelegramBotApi.
      */
     public static function api(): TelegramBotApi
     {
-        return new TelegramBotApi(config('telegram.token'), config('telegram.async'));
+        if (!isset(self::$api)) {
+            self::$api = new TelegramBotApi(config('telegram.token'), config('telegram.async'));
+        }
+
+        return self::$api;
+    }
+
+    /**
+     * Возвращает идентификатор текущего чата.
+     *
+     * @return int|null Идентификатор текущего чата или null, если он не найден.
+     */
+    private static function getCurrentChatId(): ?int
+    {
+        return request()->chat->id ?? null;
     }
 }

@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+
+<html lang="ru" prefix="og: http://ogp.me/ns#">
+
+<head>
+  <base href="" />
+
+  <title>FrameX</title>
+
+  <meta charset="utf-8" />
+
+  <!-- SEO Meta -->
+  <meta name="language" content="RU" />
+  <meta name="robots" content="index,follow" />
+  <meta name="title" content="FrameX" />
+  <meta name="description" content="" />
+  <meta name="keywords" content="" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+  <!-- Apple Meta Tags -->
+  <meta name="apple-mobile-web-app-capable" content="yes" />
+  <meta name="apple-touch-fullscreen" content="yes" />
+  <meta name="apple-mobile-web-app-status-bar-style" content="black" />
+  <meta name="format-detection" content="telephone=no" />
+
+  <!-- About Creator App -->
+  <meta name="owner" content="owner@rootx.ru" />
+  <meta name="designer" content="designer@rootx.ru" />
+  <meta name="author" content="localzet, creator@localzet.com" />
+  <meta name="copyright" content="RootX Group" />
+  <meta name="reply-to" content="support@rootx.ru" />
+
+  <!-- System Information -->
+  <meta name="generator" content="Triangle Framework" />
+  <meta name="FrameX" version="<?= config('app.version', '!notSET!') ?>" debug="<?= config('app.debug', '!notSET!') ?>" />
+
+  <!-- HTTP Equiv -->
+  <meta http-equiv="Expires" content="60" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Cache-Control" content="no-cache" />
+  <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+
+  <!-- SEO Link -->
+  <link rel="canonical" href="<?= config('app.domain', request()->url()) ?>" />
+  <link rel="icon" type="image/svg+xml" href="<?= config('app.logo', '/favicon.svg') ?>" />
+  <link rel="shortcut icon" type="image/svg+xml" href="<?= config('app.logo', '/favicon.svg') ?>" />
+</head>
+
+<body>
+  hello
+  <?= htmlspecialchars($name) ?>
+</body>
+
+</html>

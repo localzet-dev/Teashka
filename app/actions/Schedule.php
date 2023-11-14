@@ -2,7 +2,7 @@
 
 namespace app\actions;
 
-use app\service\Localzet;
+use app\service\UniT;
 use app\service\Telegram;
 
 class Schedule
@@ -19,7 +19,7 @@ class Schedule
     $start = self::getStartDateTime($parameters);
     $end = self::getEndDateTime($parameters, $start);
 
-    $schedule = Localzet::getSchedule($start, $end);
+    $schedule = UniT::getSchedule($start, $end);
 
     if (empty($schedule)) {
       Telegram::sendMessage("Занятий нет", $chatId);

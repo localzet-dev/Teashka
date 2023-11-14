@@ -2,7 +2,7 @@
 
 namespace app\model;
 
-use support\MongoModel;
+use Triangle\MongoDB\Model;
 
 /**
  * Модель пользователя.
@@ -10,9 +10,9 @@ use support\MongoModel;
  * @property int $id Идентификатор пользователя.
  * @property int $state Статус пользователя.
  * @property string $login Логин в ЭИОС ДГТУ.
- * @property string $token Токен пользователя в Localzet Global.
+ * @property string $token Токен пользователя в UniT Global.
  */
-class User extends MongoModel
+class User extends Model
 {
     /**
      * Имя подключения к MongoDB.

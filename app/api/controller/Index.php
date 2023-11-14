@@ -8,11 +8,16 @@ use app\actions\Support;
 use app\model\Attempts;
 use app\model\User;
 use app\service\Dialogflow;
-use app\service\Localzet;
+use app\service\UniT;
 use app\service\Telegram;
 use app\service\Voice;
+use Exception;
+use Google\ApiCore\ApiException;
+use Google\ApiCore\ValidationException;
 use support\Request;
 use support\Response;
+use Telegram\Bot\Exceptions\TelegramSDKException;
+use Throwable;
 
 class Index
 {
@@ -21,6 +26,7 @@ class Index
      *
      * @param Request $request Объект запроса.
      * @return Response Ответ сервера.
+     * @throws Throwable
      */
     public function index(Request $request): Response
     {
@@ -42,7 +48,7 @@ class Index
             unlink($voicePath);
         }
 
-        if (strpos($text, '/') === 0) {
+        if (str_starts_with($text, '/')) {
             // Обработка команды
             $this->handleCommand($text, $chatId);
         } else {
@@ -59,8 +65,9 @@ class Index
      * @param string $command Команда пользователя.
      * @param int $chatId Идентификатор чата.
      * @return void
+     * @throws TelegramSDKException
      */
-    private function handleCommand($command, $chatId)
+    private function handleCommand(string $command, int $chatId): void
     {
         switch ($command) {
             case '/schedule':
@@ -83,8 +90,11 @@ class Index
      * @param string $text Текстовое сообщение пользователя.
      * @param int $chatId Идентификатор чата.
      * @return void
+     * @throws ApiException
+     * @throws ValidationException
+     * @throws TelegramSDKException
      */
-    private function handleTextMessage($text, $chatId)
+    private function handleTextMessage(string $text, int $chatId): void
     {
         switch ($text) {
             case 'Что ты умеешь?':
@@ -123,6 +133,8 @@ class Index
      *
      * @param Request $request Объект запроса.
      * @return void
+     * @throws TelegramSDKException
+     * @throws Exception
      */
     public function auth(Request $request): void
     {
@@ -139,11 +151,11 @@ class Index
                     return;
                 }
 
-                $token = Localzet::userByLogin($login)['token'];
+                $token = UniT::userByLogin($login)['token'];
                 $user->update(['token' => $token]);
                 Attempts::updateOrCreate(['user' => $user->id], ['login' => $login]);
 
-                $code = hash_hmac('md5', $login, config('app.secret'));
+                $code = hash_hmac('md5', $login, getenv('SECRET'));
                 $url = "https://" . config('app.domain') . "/auth?id=" . $request->chat->id . "&code=" . $code;
                 $username = '@' . $message->from->username ?? $message->from->id;
 
@@ -154,7 +166,7 @@ class Index
                     }
                 }
 
-                Localzet::eduMailSend(
+                UniT::eduMailSend(
                     "Тишка: Авторизация",
                     "Привет! Твоя ссылка для авторизации: [$url]($url). Так я смогу убедиться, что Telegram-аккаунт ($username) принадлежит тебе :)\nВнимание!!! Если ты НЕ пытался войти в бота - НЕ ПЕРЕХОДИ ПО ССЫЛКЕ, это даст пользователю доступ к твоим данным!",
                 );

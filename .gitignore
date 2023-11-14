@@ -19,6 +19,7 @@ $RECYCLE.BIN/
 *.msm
 *.msp
 *.lnk 
+*.pid
 
 *~
 
@@ -60,5 +61,3 @@ dist
 !.vscode/launch.json
 !.vscode/extensions.json
 *.code-workspace
-
-/config/*

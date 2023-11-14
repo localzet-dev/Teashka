@@ -2,26 +2,32 @@
 
 namespace app\service;
 
+use Google\ApiCore\ApiException;
+use Google\ApiCore\ValidationException;
+use Google\Cloud\Dialogflow\V2\DetectIntentResponse;
 use Google\Cloud\Dialogflow\V2\QueryInput;
+use Google\Cloud\Dialogflow\V2\QueryResult;
 use Google\Cloud\Dialogflow\V2\SessionsClient;
 use Google\Cloud\Dialogflow\V2\TextInput;
 
 class Dialogflow
 {
     /**
-     * Обрабатывает запрос к Dialogflow API и возвращает результат.
+     * Обрабатывает запрос к Dialogflow API, и возвращает результат.
      *
      * @param string $sessionID Идентификатор сессии пользователя.
      * @param string $message Сообщение пользователя.
-     * @return \Google\Cloud\Dialogflow\V2\QueryResult Результат запроса к Dialogflow.
+     * @return QueryResult Результат запроса к Dialogflow.
+     * @throws ValidationException
+     * @throws ApiException
      */
-    public static function process($sessionID, $message)
+    public static function process(string $sessionID, string $message): QueryResult
     {
         // Создаем экземпляр клиента SessionsClient.
-        $client = new SessionsClient(['credentials' => base_path() . '/resources/dialogflow.json']);
+        $client = new SessionsClient(['credentials' => getenv('DF_CREDENTIALS')]);
 
         // Формируем имя сессии.
-        $session = self::getSessionName(config('app.dialogflow_project'), $sessionID);
+        $session = self::getSessionName(getenv('DF_PROJECT_ID'), $sessionID);
 
         // Создаем экземпляр TextInput и задаем текст сообщения и язык.
         $textInput = self::createTextInput($message);
@@ -33,9 +39,7 @@ class Dialogflow
         $response = self::detectIntent($client, $session, $queryInput);
 
         // Получаем результат запроса.
-        $result = $response->getQueryResult();
-
-        return $result;
+        return $response->getQueryResult();
     }
 
     /**
@@ -45,18 +49,18 @@ class Dialogflow
      * @param string $sessionID Идентификатор сессии пользователя.
      * @return string Имя сессии.
      */
-    private static function getSessionName($projectID, $sessionID)
+    private static function getSessionName(string $projectID, string $sessionID): string
     {
         return "projects/{$projectID}/agent/sessions/{$sessionID}";
     }
 
     /**
-     * Создает экземпляр TextInput и задает текст сообщения и язык.
+     * Создает экземпляр TextInput, и задает текст сообщения и язык.
      *
      * @param string $message Сообщение пользователя.
-     * @return \Google\Cloud\Dialogflow\V2\TextInput Экземпляр TextInput.
+     * @return TextInput Экземпляр TextInput.
      */
-    private static function createTextInput($message)
+    private static function createTextInput(string $message): TextInput
     {
         $textInput = new TextInput();
         $textInput->setText($message);
@@ -68,10 +72,10 @@ class Dialogflow
     /**
      * Создает экземпляр QueryInput и задает входные данные.
      *
-     * @param \Google\Cloud\Dialogflow\V2\TextInput $textInput Экземпляр TextInput.
-     * @return \Google\Cloud\Dialogflow\V2\QueryInput Экземпляр QueryInput.
+     * @param TextInput $textInput Экземпляр TextInput.
+     * @return QueryInput Экземпляр QueryInput.
      */
-    private static function createQueryInput($textInput)
+    private static function createQueryInput(TextInput $textInput): QueryInput
     {
         $queryInput = new QueryInput();
         $queryInput->setText($textInput);
@@ -82,12 +86,13 @@ class Dialogflow
     /**
      * Выполняет запрос к Dialogflow API для обнаружения намерения (intent).
      *
-     * @param \Google\Cloud\Dialogflow\V2\SessionsClient $client Экземпляр клиента SessionsClient.
+     * @param SessionsClient $client Экземпляр клиента SessionsClient.
      * @param string $session Имя сессии.
-     * @param \Google\Cloud\Dialogflow\V2\QueryInput $queryInput Экземпляр QueryInput.
-     * @return \Google\Cloud\Dialogflow\V2\DetectIntentResponse Результат запроса к Dialogflow.
+     * @param QueryInput $queryInput Экземпляр QueryInput.
+     * @return DetectIntentResponse Результат запроса к Dialogflow.
+     * @throws ApiException
      */
-    private static function detectIntent($client, $session, $queryInput)
+    private static function detectIntent(SessionsClient $client, string $session, QueryInput $queryInput): DetectIntentResponse
     {
         return $client->detectIntent($session, $queryInput);
     }

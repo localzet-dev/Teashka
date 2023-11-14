@@ -20,8 +20,7 @@ class Voice
 
         // Обрабатываем результат
         $result = trim($result);
-        $result = substr($result, 4);
 
-        return $result;
+        return substr($result, 4);
     }
 }

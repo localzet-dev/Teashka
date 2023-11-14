@@ -8,6 +8,8 @@ use app\service\Telegram;
 use Exception;
 use support\Request;
 use support\Response;
+use Telegram\Bot\Exceptions\TelegramSDKException;
+use Throwable;
 
 class Index
 {
@@ -16,7 +18,8 @@ class Index
      *
      * @param Request $request Объект запроса.
      * @return Response Ответ сервера.
-     * @throws Exception Если URL некорректный.
+     * @throws TelegramSDKException
+     * @throws Throwable
      */
     public function index(Request $request): Response
     {
@@ -51,7 +54,7 @@ class Index
         // Проверяем код активации для каждой попытки
         foreach ($users as $userlogin) {
             $login = $userlogin->login;
-            $hashedCode = hash_hmac('md5', $login, config('app.secret'));
+            $hashedCode = hash_hmac('md5', $login, getenv('SECRET'));
 
             // Если код активации совпадает, выполняем активацию аккаунта
             if ($code == $hashedCode) {

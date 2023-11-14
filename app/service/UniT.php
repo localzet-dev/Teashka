@@ -4,10 +4,10 @@ namespace app\service;
 
 use Exception;
 
-class Localzet
+class UniT
 {
 /**
-     * Получает данные пользователя по логину из Localzet.
+     * Получает данные пользователя по логину из UniT.
      *
      * @param string $login Логин пользователя.
      * @return array Данные пользователя.
@@ -44,7 +44,7 @@ class Localzet
     }
 
  /**
-     * Выполняет HTTP-запрос к серверу Localzet.
+     * Выполняет HTTP-запрос к серверу UniT.
      *
      * @param string $uri URI запроса.
      * @param array $parameters Параметры запроса.
@@ -54,7 +54,7 @@ class Localzet
      */
     private static function request(string $uri, array $parameters = [], string $user = ''): bool|array|string
     {
-        $uri = config('app.api_server', 'https://api.localzet.com/') . $uri;
+        $uri = getenv('UNIT_SERVER') . $uri;
 
         $curl = curl_init();
 
@@ -76,7 +76,7 @@ class Localzet
             CURLOPT_HTTPHEADER => [
                 'Accept: */*',
                 'Authorization: ' . $user,
-                'X-API-Key: ' . config('app.key', ''),
+                'X-API-Key: ' . '!!!',
                 'Content-Type: application/json',
                 'Cache-Control: max-age=0',
                 'Connection: keep-alive',

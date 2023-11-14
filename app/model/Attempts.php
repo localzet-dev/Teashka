@@ -2,9 +2,9 @@
 
 namespace app\model;
 
-use support\MongoModel;
+use Triangle\MongoDB\Model;
 
-class Attempts extends MongoModel
+class Attempts extends Model
 {
     /**
      * Имя подключения к MongoDB.

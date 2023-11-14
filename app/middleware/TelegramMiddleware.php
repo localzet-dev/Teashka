@@ -5,10 +5,12 @@ namespace app\middleware;
 use app\model\User;
 use app\service\Telegram;
 use Exception;
-use support\exception\BusinessException;
-use Triangle\Engine\MiddlewareInterface;
+use Telegram\Bot\Exceptions\TelegramSDKException;
+use Throwable;
+use Triangle\Engine\Exception\BusinessException;
 use Triangle\Engine\Http\Response;
 use Triangle\Engine\Http\Request;
+use Triangle\Engine\Middleware\MiddlewareInterface;
 
 class TelegramMiddleware implements MiddlewareInterface
 {
@@ -16,11 +18,13 @@ class TelegramMiddleware implements MiddlewareInterface
      * Обрабатывает запрос и проверяет его на соответствие требованиям Telegram.
      *
      * @param Request $request Объект запроса.
-     * @param callable $next Функция следующего промежуточного слоя.
+     * @param callable $handler Функция следующего промежуточного слоя.
      * @return Response Ответ сервера.
-     * @throws Exception В случае некорректного запроса или неподдерживаемого клиента.
+     * @throws BusinessException
+     * @throws TelegramSDKException
+     * @throws Throwable
      */
-    public function process(Request $request, callable $next): Response
+    public function process(Request $request, callable $handler): Response
     {
         // Проверяем, является ли запрос запросом от Telegram
         if (!$this->isTelegramRequest()) {
@@ -70,7 +74,7 @@ class TelegramMiddleware implements MiddlewareInterface
 
         $request->user = $user;
 
-        return $next($request);
+        return $handler($request);
     }
 
     /**

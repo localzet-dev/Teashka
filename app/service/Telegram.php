@@ -3,15 +3,17 @@
 namespace app\service;
 
 use Exception;
-use support\TelegramBotApi;
+use Telegram\Bot\Api;
 use Telegram\Bot\Events\UpdateWasReceived;
+use Telegram\Bot\Exceptions\TelegramSDKException;
 use Telegram\Bot\FileUpload\InputFile;
 use Telegram\Bot\Objects\Message;
 use Telegram\Bot\Objects\Update;
+use Triangle\Engine\Http\Request;
 
 class Telegram
 {
-    public static TelegramBotApi $api;
+    public static Api $api;
 
     /**
      * Загружает голосовое сообщение из Telegram и сохраняет его на сервер.
@@ -23,7 +25,7 @@ class Telegram
     public static function downloadVoice(Message $message): string
     {
         $filePath = self::api()->getFile(['file_id' => $message->voice->fileId])->filePath;
-        $fileUrl = 'https://api.telegram.org/file/bot' . config('telegram.token') . '/' . $filePath;
+        $fileUrl = 'https://api.telegram.org/file/bot' . getenv('TG_TOKEN') . '/' . $filePath;
         $savePath = base_path("resources/voices/{$message->chat->id}_" . basename($filePath));
 
         $fileContent = file_get_contents($fileUrl);
@@ -42,6 +44,7 @@ class Telegram
      * @param int|null $chat_id Идентификатор чата. Если не указан, будет использован идентификатор текущего чата.
      * @param array $options Дополнительные параметры сообщения.
      * @return void
+     * @throws TelegramSDKException
      */
     public static function sendMessage(string $text, ?int $chat_id = null, array $options = []): void
     {
@@ -64,6 +67,7 @@ class Telegram
      * @param int|null $chat_id Идентификатор чата. Если не указан, будет использован идентификатор текущего чата.
      * @param array $options Дополнительные параметры сообщения.
      * @return void
+     * @throws TelegramSDKException
      */
     public static function sendPhoto(string $photo, ?int $chat_id = null, array $options = []): void
     {
@@ -80,10 +84,11 @@ class Telegram
     /**
      * Разбирает входные данные запроса и создает объект Update.
      *
-     * @param mixed $request Запрос.
+     * @param Request $request Запрос.
      * @return Update Объект Update.
+     * @throws TelegramSDKException
      */
-    public static function parseInput($request): Update
+    public static function parseInput(Request $request): Update
     {
         $body = json_decode($request->rawBody(), true);
         $update = new Update($body);
@@ -94,14 +99,15 @@ class Telegram
     }
 
     /**
-     * Возвращает объект TelegramBotApi для выполнения запросов к Telegram API.
+     * Возвращает объект Api для выполнения запросов к Telegram API.
      *
-     * @return TelegramBotApi Объект TelegramBotApi.
+     * @return Api Объект TelegramBotApi.
+     * @throws TelegramSDKException
      */
-    public static function api(): TelegramBotApi
+    public static function api(): Api
     {
         if (!isset(self::$api)) {
-            self::$api = new TelegramBotApi(config('telegram.token'), config('telegram.async'));
+            self::$api = new Api(getenv('TG_TOKEN'));
         }
 
         return self::$api;

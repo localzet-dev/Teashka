@@ -39,7 +39,10 @@
     "ext-posix": "*",
     "triangle/engine": "^5.0",
     "google/cloud-dialogflow": "^1.4",
-    "irazasyed/telegram-bot-sdk": "^3.9"
+    "irazasyed/telegram-bot-sdk": "^3.9",
+    "triangle/mongodb": "^1.0",
+    "vlucas/phpdotenv": "^5.6",
+    "ext-curl": "*"
   },
   "suggest": {
     "ext-simplexml": "For XML Support",

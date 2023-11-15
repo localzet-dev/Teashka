@@ -1,6 +1,6 @@
 <?php
 
-namespace app\service;
+namespace app\repositories;
 
 use Google\ApiCore\ApiException;
 use Google\ApiCore\ValidationException;

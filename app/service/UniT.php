@@ -90,14 +90,12 @@ class UniT
         curl_close($curl);
 
         if ($response === false) {
-            Telegram::sendMessage('Не могу подключиться к серверу');
             throw new Exception('Не могу подключиться к серверу');
         }
 
         $json = json_decode($response, true);
 
         if ($json && isset($json['status']) && $json['status'] != 200) {
-            Telegram::sendMessage($json['error']);
             throw new Exception($json['error']);
         }
 

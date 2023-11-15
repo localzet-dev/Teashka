@@ -5,11 +5,9 @@ import os
 import sys
 import subprocess
 import json
+from shutil import which
 
 from vosk import KaldiRecognizer, Model, SetLogLevel
-
-# Путь до ffmpeg
-ffmpeg_path = "/usr/bin/ffmpeg"
 
 def check_path(path, error_message):
     if not os.path.exists(path):
@@ -17,6 +15,12 @@ def check_path(path, error_message):
         exit(1)
 
 def recognize_voice(voice_file, model_path):
+    # Путь до ffmpeg
+    ffmpeg_path = which("ffmpeg")
+    if ffmpeg_path is None:
+        print("err: Не найден ffmpeg")
+        exit(1)
+
     # Конвертируем аудио в формат wav и получаем результат в process.stdout
     process = subprocess.Popen(
         [
@@ -49,11 +53,6 @@ def recognize_voice(voice_file, model_path):
     print("suc: " + result_dict["text"])
 
 try:
-    """
-    FFMPEG
-    """
-    check_path(ffmpeg_path, "Не найден ffmpeg")
-
     """
     VOSK
     """

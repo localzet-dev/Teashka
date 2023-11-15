@@ -34,6 +34,11 @@ class Voice
         // Обрабатываем результат
         $result = trim($result);
 
+        // Проверяем, успешно ли прошло распознавание
+        if (!str_starts_with($result, 'suc:')) {
+            throw new Exception('Ошибка распознавания голоса: ' . $result);
+        }
+
         return substr($result, 4);
     }
 }

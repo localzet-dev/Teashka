@@ -80,7 +80,7 @@ class Telegram
     public function downloadVoice(Message $message): string
     {
         $fileUrl = $this->downloadFile($message->voice->fileId);
-        $savePath = base_path("resources/voices/{$message->chat->id}_" . basename($fileUrl));
+        $savePath = base_path("public/voices/{$message->chat->id}_" . basename($fileUrl));
 
         try {
             return $this->saveFile($fileUrl, $savePath);

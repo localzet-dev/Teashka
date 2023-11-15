@@ -11,29 +11,82 @@ use Telegram\Bot\Objects\Message;
 use Telegram\Bot\Objects\Update;
 use Triangle\Engine\Http\Request;
 
+/**
+ * Класс для работы с Telegram API.
+ */
 class Telegram
 {
-    public static Api $api;
+    /**
+     * @var Api Объект для работы с Telegram API.
+     */
+    private Api $api;
 
     /**
-     * Загружает голосовое сообщение из Telegram и сохраняет его на сервер.
+     * @var int|null Идентификатор текущего чата.
+     */
+    private ?int $chatId;
+
+    /**
+     * Конструктор класса.
+     *
+     * @param string $token Токен бота.
+     * @param int|null $chatId Идентификатор чата.
+     * @throws TelegramSDKException
+     */
+    public function __construct(string $token, ?int $chatId = null)
+    {
+        $this->api = new Api($token);
+        $this->chatId = $chatId;
+    }
+
+    /**
+     * Загружает файл из Telegram.
+     *
+     * @param string $fileId Идентификатор файла.
+     * @return string URL файла.
+     * @throws TelegramSDKException
+     */
+    public function downloadFile(string $fileId): string
+    {
+        $filePath = $this->api->getFile(['file_id' => $fileId])->filePath;
+        return 'https://api.telegram.org/file/bot' . getenv('TG_TOKEN') . '/' . $filePath;
+    }
+
+    /**
+     * Сохраняет файл на сервере.
+     *
+     * @param string $fileUrl URL файла.
+     * @param string $savePath Путь для сохранения файла.
+     * @return string Путь к сохраненному файлу.
+     * @throws Exception Если произошла ошибка при сохранении файла.
+     */
+    public function saveFile(string $fileUrl, string $savePath): string
+    {
+        $fileContent = file_get_contents($fileUrl);
+        if ($fileContent !== false && file_put_contents($savePath, $fileContent) !== false) {
+            return $savePath;
+        } else {
+            throw new Exception('Ошибка загрузки файла');
+        }
+    }
+
+    /**
+     * Загружает голосовое сообщение из Telegram и сохраняет его на сервере.
      *
      * @param Message $message Объект сообщения.
      * @return string Путь к сохраненному голосовому сообщению.
      * @throws Exception Если произошла ошибка при загрузке голосового сообщения.
      */
-    public static function downloadVoice(Message $message): string
+    public function downloadVoice(Message $message): string
     {
-        $filePath = self::api()->getFile(['file_id' => $message->voice->fileId])->filePath;
-        $fileUrl = 'https://api.telegram.org/file/bot' . getenv('TG_TOKEN') . '/' . $filePath;
-        $savePath = base_path("resources/voices/{$message->chat->id}_" . basename($filePath));
+        $fileUrl = $this->downloadFile($message->voice->fileId);
+        $savePath = base_path("resources/voices/{$message->chat->id}_" . basename($fileUrl));
 
-        $fileContent = file_get_contents($fileUrl);
-        if ($fileContent !== false && file_put_contents($savePath, $fileContent) !== false) {
-            return $savePath;
-        } else {
-            self::sendMessage("Ошибка загрузки голосового сообщения");
-            throw new Exception('Ошибка загрузки голосового сообщения');
+        try {
+            return $this->saveFile($fileUrl, $savePath);
+        } catch (Exception $e) {
+            $this->sendMessage("Ошибка загрузки голосового сообщения");
+            throw $e;
         }
     }
 
@@ -41,44 +94,35 @@ class Telegram
      * Отправляет сообщение через Telegram API.
      *
      * @param string $text Текст сообщения.
-     * @param int|null $chat_id Идентификатор чата. Если не указан, будет использован идентификатор текущего чата.
      * @param array $options Дополнительные параметры сообщения.
-     * @return void
      * @throws TelegramSDKException
      */
-    public static function sendMessage(string $text, ?int $chat_id = null, array $options = []): void
+    public function sendMessage(string $text, array $options = []): void
     {
-        $chat_id = $chat_id ?? self::getCurrentChatId();
-
         $messageData = [
-            'chat_id' => $chat_id,
+            'chat_id' => $this->chatId,
             'text' => $text,
             'parse_mode' => $options['parse_mode'] ?? 'HTML',
         ];
 
-        self::api()->sendMessage(array_merge($messageData, $options));
+        $this->api->sendMessage(array_merge($messageData, $options));
     }
-
 
     /**
      * Отправляет фото через Telegram API.
      *
      * @param string $photo Фото.
-     * @param int|null $chat_id Идентификатор чата. Если не указан, будет использован идентификатор текущего чата.
      * @param array $options Дополнительные параметры сообщения.
-     * @return void
      * @throws TelegramSDKException
      */
-    public static function sendPhoto(string $photo, ?int $chat_id = null, array $options = []): void
+    public function sendPhoto(string $photo, array $options = []): void
     {
-        $chat_id = $chat_id ?? self::getCurrentChatId();
-
         $messageData = [
-            'chat_id' => $chat_id,
+            'chat_id' => $this->chatId,
             'photo' =>  InputFile::create($photo),
         ];
 
-        self::api()->sendPhoto(array_merge($messageData, $options));
+        $this->api->sendPhoto(array_merge($messageData, $options));
     }
 
     /**
@@ -86,40 +130,14 @@ class Telegram
      *
      * @param Request $request Запрос.
      * @return Update Объект Update.
-     * @throws TelegramSDKException
      */
-    public static function parseInput(Request $request): Update
+    public function parseInput(Request $request): Update
     {
         $body = json_decode($request->rawBody(), true);
         $update = new Update($body);
 
-        self::api()->emitEvent(new UpdateWasReceived($update, self::api()));
+        $this->api->emitEvent(new UpdateWasReceived($update, $this->api));
 
         return $update;
-    }
-
-    /**
-     * Возвращает объект Api для выполнения запросов к Telegram API.
-     *
-     * @return Api Объект TelegramBotApi.
-     * @throws TelegramSDKException
-     */
-    public static function api(): Api
-    {
-        if (!isset(self::$api)) {
-            self::$api = new Api(getenv('TG_TOKEN'));
-        }
-
-        return self::$api;
-    }
-
-    /**
-     * Возвращает идентификатор текущего чата.
-     *
-     * @return int|null Идентификатор текущего чата или null, если он не найден.
-     */
-    private static function getCurrentChatId(): ?int
-    {
-        return request()->chat->id ?? null;
     }
 }

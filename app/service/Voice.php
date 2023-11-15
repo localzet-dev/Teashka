@@ -24,7 +24,7 @@ class Voice
         }
 
         // Формируем команду для запуска скрипта распознавания голоса
-        $command = sprintf('python3 %s %s %s', base_path() . '/resources/recognizer.py', escapeshellarg($voiceFile), escapeshellarg($modelPath));
+        $command = sprintf('python3 %s %s %s', base_path() . '/resources/scripts/recognizer.py', escapeshellarg($voiceFile), escapeshellarg($modelPath));
 
         // Запускаем команду и получаем результат
         $result = shell_exec($command);

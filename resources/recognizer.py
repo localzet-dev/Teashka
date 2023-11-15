@@ -11,15 +11,12 @@ from vosk import KaldiRecognizer, Model, SetLogLevel
 # Путь до ffmpeg
 ffmpeg_path = "/usr/bin/ffmpeg"
 
-# Путь до модели vosk
-model_path = "/var/www/teashka/resources/vosk-model-small"
-
 def check_path(path, error_message):
     if not os.path.exists(path):
         print(f"err: {error_message}")
         exit(1)
 
-def recognize_voice(voice_file):
+def recognize_voice(voice_file, model_path):
     # Конвертируем аудио в формат wav и получаем результат в process.stdout
     process = subprocess.Popen(
         [
@@ -60,6 +57,11 @@ try:
     """
     VOSK
     """
+    if len(sys.argv) < 3:
+        print("err: Не указан путь к модели")
+        exit(1)
+
+    model_path = sys.argv[2]
     check_path(model_path, "Не найдена модель vosk")
     SetLogLevel(-1)
     model = Model(model_path)
@@ -74,7 +76,7 @@ try:
     voice_file = sys.argv[1]
     check_path(voice_file, "Не найден аудиофайл")
 
-    recognize_voice(voice_file)
+    recognize_voice(voice_file, model_path)
 
 except Exception as e:
     print(f"err: Ошибка распознавателя - {str(e)}")

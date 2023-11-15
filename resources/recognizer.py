@@ -14,38 +14,12 @@ ffmpeg_path = "/usr/bin/ffmpeg"
 # Путь до модели vosk
 model_path = "/var/www/teashka/resources/vosk-model-small"
 
-try:
-    """
-    FFMPEG
-    """
-    # Проверяем наличие папки ffmpeg
-    if not os.path.exists(ffmpeg_path):
-        print("err: Не найден ffmpeg")
+def check_path(path, error_message):
+    if not os.path.exists(path):
+        print(f"err: {error_message}")
         exit(1)
 
-    """
-    VOSK
-    """
-    # Проверяем наличие папки модели vosk
-    if not os.path.exists(model_path):
-        print("err: Не найдена модель vosk")
-        exit(1)
-    else:
-        SetLogLevel(-1)
-        # Загружаем языковую модель в vosk
-        model = Model(model_path)
-
-    """
-    Голосовое сообщение
-    """
-    # Проверяем наличие аудиофайла в аргументах командной строки
-    if not sys.argv[1] or not os.path.exists(sys.argv[1]):
-        print("err: Не найден аудиофайл")
-        exit(1)
-    else:
-        # Получаем путь до аудиофайла из аргументов
-        voice_file = sys.argv[1]
-
+def recognize_voice(voice_file):
     # Конвертируем аудио в формат wav и получаем результат в process.stdout
     process = subprocess.Popen(
         [
@@ -77,5 +51,30 @@ try:
     result_dict = json.loads(result_json)
     print("suc: " + result_dict["text"])
 
-except:
-    print("err: Ошибка распознавателя")
+try:
+    """
+    FFMPEG
+    """
+    check_path(ffmpeg_path, "Не найден ffmpeg")
+
+    """
+    VOSK
+    """
+    check_path(model_path, "Не найдена модель vosk")
+    SetLogLevel(-1)
+    model = Model(model_path)
+
+    """
+    Голосовое сообщение
+    """
+    if len(sys.argv) < 2:
+        print("err: Не найден аудиофайл")
+        exit(1)
+
+    voice_file = sys.argv[1]
+    check_path(voice_file, "Не найден аудиофайл")
+
+    recognize_voice(voice_file)
+
+except Exception as e:
+    print(f"err: Ошибка распознавателя - {str(e)}")

@@ -15,13 +15,16 @@ class Voice
      */
     public static function recognize(string $voiceFile): string
     {
-        // Проверяем, существует ли файл
-        if (!file_exists($voiceFile)) {
+        // Путь к модели
+        $modelPath = base_path() . '/resources/vosk-model-small';
+
+        // Проверяем, существуют ли файлы
+        if (!file_exists($voiceFile) || !file_exists($modelPath)) {
             throw new Exception('Файл не найден: ' . $voiceFile);
         }
 
         // Формируем команду для запуска скрипта распознавания голоса
-        $command = sprintf('python3 %s %s', base_path() . '/resources/recognizer.py', escapeshellarg($voiceFile));
+        $command = sprintf('python3 %s %s %s', base_path() . '/resources/recognizer.py', escapeshellarg($voiceFile), escapeshellarg($modelPath));
 
         // Запускаем команду и получаем результат
         $result = shell_exec($command);

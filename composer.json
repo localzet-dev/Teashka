@@ -38,7 +38,7 @@
     "php": "^8.2",
     "ext-posix": "*",
     "triangle/engine": "^5.0",
-    "google/cloud-dialogflow": "^1.4",
+    "google/cloud-dialogflow": "^1.10",
     "irazasyed/telegram-bot-sdk": "^3.9",
     "triangle/mongodb": "^1.0",
     "vlucas/phpdotenv": "^5.6",

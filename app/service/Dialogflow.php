@@ -21,7 +21,7 @@ class Dialogflow
      */
     public function __construct(string $sessionID)
     {
-        $this->client = new SessionsClient(['credentials' => getenv('DF_CREDENTIALS')]);
+        $this->client = new SessionsClient(['credentials' => base_path('dialogflow.json')]);
         $this->session = $this->client->sessionName(getenv('DF_PROJECT_ID'), $sessionID ?: uniqid());
     }
 

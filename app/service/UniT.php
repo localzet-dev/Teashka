@@ -71,7 +71,6 @@ class UniT
         );
         [$header, $payload, $signature] = explode('.', $token);
 
-
         $http = new Client();
 
         $response = $http->request($uri, 'POST', $payload, [
@@ -85,12 +84,13 @@ class UniT
             throw new Exception('Не могу подключиться к серверу');
         }
 
-        $json = @json_decode($response, true);
+        $json = json_decode($response, true);
 
-        if ($json && isset($json['status']) && $json['status'] != 200 && isset($json['error'])) {
+        if (is_array($json) && isset($json['status']) && $json['status'] != 200 && isset($json['error'])) {
             throw new RuntimeException($json['error']);
         }
 
-        return @$json['data'] ?? $response;
+        return $json['data'] ?? $response;
     }
+
 }

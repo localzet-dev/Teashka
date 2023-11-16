@@ -50,24 +50,24 @@ class UniT
      * Выполняет HTTP-запрос к серверу UniT.
      *
      * @param string $uri URI запроса.
-     * @param array $payload Параметры запроса.
-     * @param string $user Токен пользователя.
+     * @param array $data Параметры запроса.
+     * @param string $authorization Токен пользователя.
      * @return bool|array|string Результат запроса.
      * @throws Exception В случае ошибки при выполнении запроса.
      */
     private static function request(
         string $uri,
         array  $data,
-        string $authorization,
+        string $authorization = '',
     ): bool|array|string
     {
-        $uri = getenv('UNIT_SERVER') . $uri;
+        $uri = getenv('UNIT_SERVER') . '/' . ltrim($uri, '/');
 
         $token = LWT::encode(
             $data,
             file_get_contents(base_path('resources/security/unit-public.pem')),
             'ES256K',
-            file_get_contents(base_path('resources/security/unit-public.pem')),
+            file_get_contents(base_path('resources/security/teashka-private.pem')),
         );
         [$header, $payload, $signature] = explode('.', $token);
 
@@ -76,7 +76,7 @@ class UniT
 
         $response = $http->request($uri, 'POST', $payload, [
             'X-ZORIN-SIGNATURE' => $signature,
-            'Authorization' => '',
+            'Authorization' => 'Teashka ' . $authorization,
         ], false, [
             CURLOPT_USERAGENT => 'Teashka'
         ]);
@@ -85,12 +85,12 @@ class UniT
             throw new Exception('Не могу подключиться к серверу');
         }
 
-        $json = json_decode($response, true);
+        $json = @json_decode($response, true);
 
         if ($json && isset($json['status']) && $json['status'] != 200 && isset($json['error'])) {
             throw new RuntimeException($json['error']);
         }
 
-        return $json['data'] ?? $response;
+        return @$json['data'] ?? $response;
     }
 }

@@ -3,10 +3,13 @@
 namespace app\service;
 
 use Exception;
+use localzet\HTTP\Client;
+use localzet\LWT;
+use RuntimeException;
 
 class UniT
 {
-/**
+    /**
      * Получает данные пользователя по логину из UniT.
      *
      * @param string $login Логин пользователя.
@@ -18,7 +21,7 @@ class UniT
         return self::request('internal/auth/unit/login', ['login' => $login]);
     }
 
- /**
+    /**
      * Отправляет письмо на внутренний электронный адрес пользователя.
      *
      * @param string $theme Тема письма.
@@ -43,51 +46,40 @@ class UniT
         return self::request('unit/schedule', ['start' => $start, 'end' => $end], request()->user->token);
     }
 
- /**
+    /**
      * Выполняет HTTP-запрос к серверу UniT.
      *
      * @param string $uri URI запроса.
-     * @param array $parameters Параметры запроса.
+     * @param array $payload Параметры запроса.
      * @param string $user Токен пользователя.
      * @return bool|array|string Результат запроса.
      * @throws Exception В случае ошибки при выполнении запроса.
      */
-    private static function request(string $uri, array $parameters = [], string $user = ''): bool|array|string
+    private static function request(
+        string $uri,
+        array  $data,
+        string $authorization,
+    ): bool|array|string
     {
         $uri = getenv('UNIT_SERVER') . $uri;
 
-        $curl = curl_init();
+        $token = LWT::encode(
+            $data,
+            file_get_contents(base_path('resources/security/unit-public.pem')),
+            'ES256K',
+            file_get_contents(base_path('resources/security/unit-public.pem')),
+        );
+        [$header, $payload, $signature] = explode('.', $token);
 
-        curl_setopt_array($curl, [
-            CURLOPT_POST => true,
-            CURLOPT_CUSTOMREQUEST => 'POST',
-            CURLOPT_POSTFIELDS => json_encode($parameters),
-            CURLOPT_TIMEOUT => 30,
-            CURLOPT_CONNECTTIMEOUT => 30,
-            CURLOPT_SSL_VERIFYPEER => false,
-            CURLOPT_SSL_VERIFYHOST => false,
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_FOLLOWLOCATION => true,
-            CURLOPT_MAXREDIRS => 5,
-            CURLINFO_HEADER_OUT => true,
-            CURLOPT_ENCODING => 'identity',
-            CURLOPT_USERAGENT => config('app.name'),
-            CURLOPT_URL => $uri,
-            CURLOPT_HTTPHEADER => [
-                'Accept: */*',
-                'Authorization: ' . $user,
-                'X-API-Key: ' . '!!!',
-                'Content-Type: application/json',
-                'Cache-Control: max-age=0',
-                'Connection: keep-alive',
-                'Expect: ',
-                'Pragma: ',
-            ],
+
+        $http = new Client();
+
+        $response = $http->request($uri, 'POST', $payload, [
+            'X-ZORIN-SIGNATURE' => $signature,
+            'Authorization' => '',
+        ], false, [
+            CURLOPT_USERAGENT => 'Teashka'
         ]);
-
-        $response = curl_exec($curl);
-
-        curl_close($curl);
 
         if ($response === false) {
             throw new Exception('Не могу подключиться к серверу');
@@ -95,8 +87,8 @@ class UniT
 
         $json = json_decode($response, true);
 
-        if ($json && isset($json['status']) && $json['status'] != 200) {
-            throw new Exception($json['error']);
+        if ($json && isset($json['status']) && $json['status'] != 200 && isset($json['error'])) {
+            throw new RuntimeException($json['error']);
         }
 
         return $json['data'] ?? $response;

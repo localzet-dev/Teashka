@@ -15,6 +15,11 @@ return [
     'options' => [
         'view_suffix' => 'phtml',
         'view_global' => true,
+    ],
+    'templates'=>[
+        'system' => [
+            'success' => app_path('view/success.phtml')
+        ]
     ]
 
 ];

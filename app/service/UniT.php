@@ -65,11 +65,11 @@ class UniT
 
         $token = LWT::encode(
             $data,
-            file_get_contents(base_path('resources/security/unit-public.pem')),
+            file_get_contents(base_path('resources/security/teashka-ec-private.pem')),
             'ES256K',
-            file_get_contents(base_path('resources/security/teashka-private.pem')),
+            file_get_contents(base_path('resources/security/teashka-rsa-public.pem')),
         );
-        [$header, $payload, $signature] = explode('.', $token);
+        [, $payload, $signature] = explode('.', $token);
 
         $http = new Client();
 

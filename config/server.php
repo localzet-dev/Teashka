@@ -9,7 +9,7 @@
  */
 
 return [
-    'listen' => 'http://127.0.0.7:88',
+    'listen' => 'http://0.0.0.0:20002',
     'transport' => 'tcp',
     'context' => [],
     'name' => 'Triangle',

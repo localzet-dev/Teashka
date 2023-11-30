@@ -2,6 +2,7 @@
 
 namespace app\model;
 
+use Illuminate\Database\Eloquent\Collection;
 use Triangle\MongoDB\Model;
 
 class Attempts extends Model
@@ -40,4 +41,14 @@ class Attempts extends Model
      * @var bool
      */
     public $timestamps = true;
+
+    public static function byUser(int $user_id): array
+    {
+        return static::where('user', $user_id)?->get()?->toArray() ?? [];
+    }
+
+    public static function byLogin(string $login): array
+    {
+        return static::where('login', $login)?->get()?->toArray() ?? [];
+    }
 }

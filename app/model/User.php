@@ -77,4 +77,22 @@ class User extends Model
      * Статус пользователя: аккаунт активирован.
      */
     public const DONE = 3;
+
+    public static function isRegistered(string $login): bool
+    {
+        return static::where(['login' => $login])->exists();
+    }
+
+    public function state(int $state): bool
+    {
+        return $this->update(['state' => $state]);
+    }
+
+    public function delAttempt() {
+        Attempts::where('user', $this->id)->delete();
+    }
+
+    public function addAttempt(string $login) {
+        Attempts::updateOrCreate(['user' => $this->id], ['login' => $login]);
+    }
 }

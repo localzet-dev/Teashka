@@ -22,11 +22,6 @@ class Telegram
     private Api $api;
 
     /**
-     * @var int|null Идентификатор текущего чата.
-     */
-    private ?int $chatId;
-
-    /**
      * Конструктор класса.
      *
      * @param string $token Токен бота.
@@ -36,7 +31,6 @@ class Telegram
     public function __construct(string $token, ?int $chatId = null)
     {
         $this->api = new Api($token);
-        $this->chatId = $chatId;
     }
 
     /**
@@ -77,7 +71,7 @@ class Telegram
      * @return string Путь к сохраненному голосовому сообщению.
      * @throws Exception Если произошла ошибка при загрузке голосового сообщения.
      */
-    public function downloadVoice(Message $message): string
+    public function downloadVoice(Message $message, int $chat_id): string
     {
         $fileUrl = $this->downloadFile($message->voice->fileId);
         $savePath = base_path("public/voices/{$message->chat->id}_" . basename($fileUrl));
@@ -85,7 +79,7 @@ class Telegram
         try {
             return $this->saveFile($fileUrl, $savePath);
         } catch (Exception $e) {
-            $this->sendMessage("Ошибка загрузки голосового сообщения");
+            $this->sendMessage("Ошибка загрузки голосового сообщения", $chat_id);
             throw $e;
         }
     }
@@ -97,10 +91,10 @@ class Telegram
      * @param array $options Дополнительные параметры сообщения.
      * @throws TelegramSDKException
      */
-    public function sendMessage(string $text, array $options = []): void
+    public function sendMessage(string $text, int $chat_id, array $options = []): void
     {
         $messageData = [
-            'chat_id' => $this->chatId,
+            'chat_id' => $chat_id,
             'text' => $text,
             'parse_mode' => $options['parse_mode'] ?? 'HTML',
         ];
@@ -115,11 +109,11 @@ class Telegram
      * @param array $options Дополнительные параметры сообщения.
      * @throws TelegramSDKException
      */
-    public function sendPhoto(string $photo, array $options = []): void
+    public function sendPhoto(string $photo, int $chat_id, array $options = []): void
     {
         $messageData = [
-            'chat_id' => $this->chatId,
-            'photo' =>  InputFile::create($photo),
+            'chat_id' => $chat_id,
+            'photo' => InputFile::create($photo),
         ];
 
         $this->api->sendPhoto(array_merge($messageData, $options));

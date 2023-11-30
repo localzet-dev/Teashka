@@ -9,6 +9,7 @@
  */
 
 return [
+    'token' => getenv('TG_TOKEN'),
     'supported' => [
         'events' => ['message'],
         'types' => ['private'],

@@ -18,7 +18,8 @@ Router::any('/robots.txt', function (Request $request) {
 });
 
 Router::any('/t', function (Request $request) {
-    return responseJson($request->header('user-agent'));
+    $array = \app\service\UniT::request('db/query', ['query' => 'select top 10 * from "нирПользователиВсе"']);
+    return responseJson($array);
 });
 
 Router::fallback(function () {

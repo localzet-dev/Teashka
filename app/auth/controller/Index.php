@@ -49,7 +49,7 @@ class Index
         }
 
         // Получаем список попыток активации для данного пользователя
-        $users = Attempts::where('user', $id)->get() ?? [];
+        $users = Attempts::byUser($id);
 
         // Проверяем код активации для каждой попытки
         foreach ($users as $userlogin) {
@@ -59,16 +59,17 @@ class Index
             // Если код активации совпадает, выполняем активацию аккаунта
             if ($code == $hashedCode) {
                 // Удаляем все попытки активации для данного пользователя
-                Attempts::where('user', $id)->delete();
+                $user->delAttempt();
 
                 // Получаем список неактивированных аккаунтов с таким же логином
-                $nonacts = Attempts::where('login', $login)->get() ?? [];
+                $nonacts = Attempts::byLogin($login);
 
                 // Для каждого неактивированного аккаунта отправляем уведомление и сбрасываем попытки активации
                 foreach ($nonacts as $nonact) {
                     $nonuser = User::find($nonact->user);
                     Telegram::sendMessage("Пользователь ($login) привязал другой аккаунт. Ваша попытка сброшена!", $nonuser->id);
-                    Attempts::where('user', $nonuser->id)->delete();
+                    $nonuser->delAttempt();
+
                     $nonuser->update(['state' => User::START]);
                     Telegram::sendMessage("Для использования бота пришли свой E-Mail (логин), привязанный к edu.donstu.ru");
                 }
@@ -77,9 +78,11 @@ class Index
                 $user->update(['login' => $login, 'state' => User::DONE]);
 
                 // Отправляем уведомление об успешной активации аккаунта
-                Telegram::sendMessage("Поздравляю! Твой аккаунт активирован, теперь тебе доступны все функции :)" . \PHP_EOL .
-                    "Ты можешь спросить меня о парах на завтра или написать \"Помощь\", если что-то пойдёт не так." . \PHP_EOL .
-                    "Скоро я научусь и другим функциям, следи за обновлениями: <a href=\"https://t.me/dstu_devs\">@dstu_devs</a>", $id);
+                Telegram::sendMessage(<<<MESSAGE
+                Поздравляю! Твой аккаунт активирован, теперь тебе доступны все функции :)
+                Ты можешь спросить меня о парах на завтра или написать \"Помощь\", если что-то пойдёт не так.
+                Скоро я научусь и другим функциям, следи за обновлениями: <a href=\"https://t.me/dstu_devs\">@dstu_devs</a>
+                MESSAGE, $id);
 
                 return response('Аккаунт активирован. <a href="https://t.me/TeashkaBot">Вернись в телеграм</a>');
             }

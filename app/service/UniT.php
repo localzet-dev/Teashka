@@ -51,17 +51,21 @@ class UniT
      *
      * @param string $uri URI запроса.
      * @param array $data Параметры запроса.
-     * @param string $authorization Токен пользователя.
+     * @param mixed|null $user
      * @return bool|array|string Результат запроса.
      * @throws Exception В случае ошибки при выполнении запроса.
      */
-    private static function request(
+    public static function request(
         string $uri,
         array  $data,
-        string $authorization = '',
+        mixed $user = null,
     ): bool|array|string
     {
-        $uri = getenv('UNIT_SERVER') . '/' . ltrim($uri, '/');
+        $url = getenv('UNIT_SERVER') . '/' . ltrim($uri, '/');
+
+        if ($user) {
+            $data['user'] = $user;
+        }
 
         $token = LWT::encode(
             $data,
@@ -73,15 +77,14 @@ class UniT
 
         $http = new Client();
 
-        $response = $http->request($uri, 'POST', $payload, [
-            'X-ZORIN-SIGNATURE' => $signature,
-            'Authorization' => 'Teashka ' . $authorization,
-        ], false, [
-            CURLOPT_USERAGENT => 'Teashka'
-        ]);
+        $response = $http->request($url, 'POST', [$payload],
+            ['X-ZORIN-SIGNATURE' => "LWTv3 $signature"],
+            false,
+            [CURLOPT_USERAGENT => 'Teashka']
+        );
 
         if ($response === false) {
-            throw new Exception('Не могу подключиться к серверу');
+            throw new Exception('Не могу подключиться к серверу: ' . $http->getResponseClientError());
         }
 
         $json = json_decode($response, true);

@@ -18,7 +18,8 @@ return [
     ],
     'templates'=>[
         'system' => [
-            'success' => app_path('view/success.phtml')
+            'success' => app_path('view/success.phtml'),
+            'error' => app_path('view/error.phtml'),
         ]
     ]
 

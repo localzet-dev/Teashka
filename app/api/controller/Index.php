@@ -6,12 +6,10 @@ use app\actions\Schedule;
 use app\actions\Settings;
 use app\actions\Support;
 use app\helpers\Voice;
-use app\model\Attempts;
 use app\model\User;
 use app\repositories\Dialogflow;
+use app\service\AuthService;
 use app\service\Telegram;
-use app\service\UniT;
-use Exception;
 use Google\ApiCore\ApiException;
 use Google\ApiCore\ValidationException;
 use support\Request;
@@ -35,10 +33,10 @@ class Index
         $text = $message->text;
         $chatId = $message->chat->id;
 
-        // Если пользователь не находится в состоянии User::DONE, перенаправляем на авторизацию
-        if ($user->state != User::DONE) {
-            $this->auth($request);
-            return response();
+        if ($user->state === User::START) {
+            AuthService::start($request);
+        } elseif ($user->state === User::VERIFY) {
+            AuthService::pending($request);
         }
 
         // Загружаем голосовое сообщение из Telegram и распознаем его
@@ -73,12 +71,12 @@ class Index
             case '/schedule':
                 Schedule::process($chatId);
                 break;
-                // case '/setings':
-                //     Settings::process($chatId);
-                //     break;
-                // case '/support':
-                //     Support::process($chatId);
-                //     break;
+            // case '/setings':
+            //     Settings::process($chatId);
+            //     break;
+            // case '/support':
+            //     Support::process($chatId);
+            //     break;
             default:
                 Telegram::sendMessage('Неверная команда. Попробуйте еще раз.');
         }
@@ -125,66 +123,6 @@ class Index
                 break;
             default:
                 Telegram::sendMessage('Извини, не совсем понимаю, о чём ты');
-        }
-    }
-
-    /**
-     * Авторизует пользователя и отправляет ссылку для активации аккаунта.
-     *
-     * @param Request $request Объект запроса.
-     * @return void
-     * @throws TelegramSDKException
-     * @throws Exception
-     */
-    public function auth(Request $request): void
-    {
-        $user = $request->user;
-        $message = $request->message;
-
-        switch ($user->state) {
-            case User::START:
-                $login = trim($message->text);
-                $existingUser = User::where(['login' => $login])->exists();
-
-                if ($existingUser) {
-                    Telegram::sendMessage("Этот аккаунт уже привязан! Введи свою почту (логин)");
-                    return;
-                }
-
-                $token = UniT::userByLogin($login)['token'];
-                $user->update(['token' => $token]);
-                Attempts::updateOrCreate(['user' => $user->id], ['login' => $login]);
-
-                $code = hash_hmac('md5', $login, getenv('SECRET'));
-                $url = "https://" . config('app.domain') . "/auth?id=" . $request->chat->id . "&code=" . $code;
-                $username = '@' . $message->from->username ?? $message->from->id;
-
-                if (!empty($message->from->firstname)) {
-                    $username = $message->from->firstname;
-                    if (!empty($message->from->lastname)) {
-                        $username = $message->from->firstname . ' ' . $message->from->lastname;
-                    }
-                }
-
-                UniT::eduMailSend(
-                    "Тишка: Авторизация",
-                    "Привет! Твоя ссылка для авторизации: [$url]($url). Так я смогу убедиться, что Telegram-аккаунт ($username) принадлежит тебе :)\nВнимание!!! Если ты НЕ пытался войти в бота - НЕ ПЕРЕХОДИ ПО ССЫЛКЕ, это даст пользователю доступ к твоим данным!",
-                );
-
-                $user->update(['state' => User::VERIFY]);
-
-                Telegram::sendMessage("Чтобы продолжить тебе нужно подтвердить свой аккаунт. " . \PHP_EOL .
-                "Я отправил ссылку для авторизации на  внутреннюю почту. Если хочешь отменить запрос - отправь /cancel. " . \PHP_EOL .
-                "Чтобы попасть на внутреннюю почту перейди по ссылке https://edu.donstu.ru/WebApp/#/mail/all");
-                return;
-                default:
-                if ($message->text == '/cancel') {
-                    Attempts::where('user', $user->id)->delete();
-                    $user->update(['state' => User::START]);
-                    Telegram::sendMessage("Для использования бота пришли свой E-Mail (логин), привязанный к edu.donstu.ru");
-                }
-                Telegram::sendMessage("Проверь внутреннюю почту (https://edu.donstu.ru/WebApp/#/mail/all)");
-                return;
         }
     }
 }

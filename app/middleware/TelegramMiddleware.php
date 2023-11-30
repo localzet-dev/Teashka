@@ -6,10 +6,13 @@ use app\model\User;
 use app\service\Telegram;
 use Exception;
 use Telegram\Bot\Exceptions\TelegramSDKException;
+use Telegram\Bot\Objects\Chat;
+use Telegram\Bot\Objects\Message;
+use Telegram\Bot\Objects\Update;
 use Throwable;
 use Triangle\Engine\Exception\BusinessException;
-use Triangle\Engine\Http\Response;
 use Triangle\Engine\Http\Request;
+use Triangle\Engine\Http\Response;
 use Triangle\Engine\Middleware\MiddlewareInterface;
 
 class TelegramMiddleware implements MiddlewareInterface
@@ -31,48 +34,19 @@ class TelegramMiddleware implements MiddlewareInterface
             throw new Exception("Неподдерживаемый клиент", 400);
         }
 
-        // Разбираем входные данные запроса
-        $input = Telegram::parseInput($request);
+        $request->telegram = new Telegram(config('telegram.token'));
+        $request->input = $request->telegram->parseInput($request);
 
-        // Проверяем тип объекта
-        $objectType = $input->objectType();
-        $supportedEvents = config('telegram.supported.events', []);
-        if (!in_array($objectType, $supportedEvents)) {
-            throw new BusinessException("Некорректный запрос", 400);
+        $request->type = $this->getType($request->input);
+        $request->chat = $this->getChat($request->input);
+
+        try {
+            $request->message = $this->getMessage($request->input);
+            $request->user = $this->getUser($request->chat);
+        } catch (BusinessException $error) {
+            $request->telegram->sendMessage($error->getMessage(), $request->chat->id);
+            return response('ok');
         }
-
-        // Проверяем тип чата
-        $chat = $input->getChat();
-        $supportedChatTypes = config('telegram.supported.types', []);
-        if (!in_array($chat->type, $supportedChatTypes)) {
-            throw new Exception("Неподдерживаемый тип чата", 400);
-        }
-
-        // Проверяем тип сообщения (должно быть текстовое или голосовое)
-        $message = $input->getMessage();
-        if (!($message->text || $message->voice)) {
-            Telegram::sendMessage("Извини, я понимаю только текст и голосовые 🥺", $chat->id);
-            throw new Exception("Неподдерживаемый тип сообщения", 400);
-        }
-
-        // Сохраняем необходимые данные в объекте запроса
-        $request->chat = $chat;
-        $request->input = $input;
-        $request->message = $message;
-
-        // Проверяем наличие пользователя в базе данных
-        $user = User::find($chat->id);
-
-        if (!$user) {
-            // Если пользователя нет, создаем нового и отправляем приветственное сообщение
-            User::create(['id' => $chat->id, 'state' => User::START]);
-            Telegram::sendMessage("Привет! На связи Тишка, чат-бот помощник для студентов и преподавателей ДГТУ 🐱" . \PHP_EOL .
-                "Я первый бот с расписанием, который не использует шаблонные фразы, а понимает тебя. В том числе и голосовые сообщения!");
-            Telegram::sendMessage("Чтобы продолжить напиши свой E-Mail (логин), привязанный к edu.donstu.ru");
-            return response();
-        }
-
-        $request->user = $user;
 
         return $handler($request);
     }
@@ -106,5 +80,66 @@ class TelegramMiddleware implements MiddlewareInterface
         }
 
         return false;
+    }
+
+    /**
+     * @throws Exception
+     */
+    private function getType(Update $input): ?string
+    {
+        // Проверяем тип объекта
+        $event = $input->objectType();
+        $supportedEvents = config('telegram.supported.events', []);
+        if (!in_array($event, $supportedEvents)) {
+            throw new Exception("Некорректный запрос", 400);
+        }
+        return $event;
+    }
+
+    /**
+     * @throws Exception
+     */
+    private function getChat(Update $input): Chat
+    {
+        // Проверяем тип чата
+        $chat = $input->getChat();
+        $supportedChatTypes = config('telegram.supported.types', []);
+        if (!in_array($chat->type, $supportedChatTypes)) {
+            throw new Exception("Неподдерживаемый тип чата", 400);
+        }
+        return $chat;
+    }
+
+    /**
+     * @throws Exception
+     */
+    private function getMessage(Update $input): Message
+    {
+        // Проверяем тип сообщения (должно быть текстовое или голосовое)
+        $message = $input->getMessage();
+        if (!($message->text || $message->voice)) {
+            throw new BusinessException("Извини, я понимаю только текст и голосовые 🥺");
+        }
+        return $message;
+    }
+
+    /**
+     * @throws Throwable
+     * @throws TelegramSDKException
+     */
+    private function getUser(Chat $chat): User|null
+    {
+        // Проверяем наличие пользователя в базе данных
+        $user = User::find($chat->id);
+
+        if (!$user) {
+            // Если пользователя нет, создаем нового и отправляем приветственное сообщение
+            User::create(['id' => $chat->id, 'state' => User::START]);
+            telegram()->sendMessage("Привет! На связи Тишка, чат-бот помощник для студентов и преподавателей ДГТУ 🐱" . \PHP_EOL .
+                "Я первый бот с расписанием, который не использует шаблонные фразы, а понимает тебя. В том числе и голосовые сообщения!", $chat->id);
+            throw new BusinessException("Чтобы продолжить напиши свой E-Mail (логин), привязанный к edu.donstu.ru");
+        }
+
+        return $user;
     }
 }

@@ -33,7 +33,7 @@ class Index
         }
 
         // Приводим ID к целочисленному значению
-        $id = (int) $id;
+        $id = (int)$id;
 
         // Находим пользователя по ID
         $user = User::find($id);

@@ -8,7 +8,7 @@
  * @license     https://mit-license.org MIT
  */
 
-use localzet\LWT;
+use app\service\UniT;
 use support\Request;
 use support\Response;
 use Triangle\Engine\Router;
@@ -18,7 +18,7 @@ Router::any('/robots.txt', function (Request $request) {
 });
 
 Router::any('/t', function (Request $request) {
-    $array = \app\service\UniT::request('db/query', ['query' => 'select top 10 * from "нирПользователиВсе"']);
+    $array = UniT::request('db/query', ['query' => 'select top 10 * from "нирПользователиВсе"']);
     return responseJson($array);
 });
 

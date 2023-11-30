@@ -13,8 +13,8 @@ return [
     'connections' => [
         'Teashka' => [
             'driver' => 'mongodb',
-            'host'     => getenv('DB_HOST'),
-            'port'     => getenv('DB_PORT'),
+            'host' => getenv('DB_HOST'),
+            'port' => getenv('DB_PORT'),
             'database' => getenv('DB_NAME'),
             'username' => getenv('DB_USER'),
             'password' => getenv('DB_PASS'),

@@ -14,6 +14,7 @@ use Triangle\Engine\Exception\BusinessException;
 use Triangle\Engine\Http\Request;
 use Triangle\Engine\Http\Response;
 use Triangle\Engine\Middleware\MiddlewareInterface;
+use const PHP_EOL;
 
 class TelegramMiddleware implements MiddlewareInterface
 {
@@ -135,7 +136,7 @@ class TelegramMiddleware implements MiddlewareInterface
         if (!$user) {
             // Если пользователя нет, создаем нового и отправляем приветственное сообщение
             User::create(['id' => $chat->id, 'state' => User::START]);
-            telegram()->sendMessage("Привет! На связи Тишка, чат-бот помощник для студентов и преподавателей ДГТУ 🐱" . \PHP_EOL .
+            telegram()->sendMessage("Привет! На связи Тишка, чат-бот помощник для студентов и преподавателей ДГТУ 🐱" . PHP_EOL .
                 "Я первый бот с расписанием, который не использует шаблонные фразы, а понимает тебя. В том числе и голосовые сообщения!", $chat->id);
             throw new BusinessException("Чтобы продолжить напиши свой E-Mail (логин), привязанный к edu.donstu.ru");
         }

@@ -88,11 +88,13 @@ class User extends Model
         return $this->update(['state' => $state]);
     }
 
-    public function delAttempt() {
+    public function delAttempt()
+    {
         Attempts::where('user', $this->id)->delete();
     }
 
-    public function addAttempt(string $login) {
+    public function addAttempt(string $login)
+    {
         Attempts::updateOrCreate(['user' => $this->id], ['login' => $login]);
     }
 }

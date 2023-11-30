@@ -2,7 +2,6 @@
 
 namespace app\model;
 
-use Illuminate\Database\Eloquent\Collection;
 use Triangle\MongoDB\Model;
 
 class Attempts extends Model

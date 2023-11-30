@@ -16,7 +16,7 @@ return [
         'view_suffix' => 'phtml',
         'view_global' => true,
     ],
-    'templates'=>[
+    'templates' => [
         'system' => [
             'success' => app_path('view/success.phtml'),
             'error' => app_path('view/error.phtml'),

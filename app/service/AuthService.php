@@ -49,7 +49,8 @@ class AuthService
         Чтобы продолжить тебе нужно подтвердить свой аккаунт. 
         Я отправил ссылку для авторизации на  внутреннюю почту. Если хочешь отменить запрос - отправь /cancel. 
         Чтобы попасть на внутреннюю почту перейди по ссылке https://edu.donstu.ru/WebApp/#/mail/all
-        MESSAGE);
+        MESSAGE
+        );
 
     }
 
@@ -67,7 +68,8 @@ class AuthService
     /**
      * @throws BusinessException
      */
-    public static function cancel(Request $request) {
+    public static function cancel(Request $request)
+    {
         $request->user->delAttempt();
         $request->user->state(User::START);
         throw new BusinessException("Для использования бота пришли свой E-Mail (логин), привязанный к edu.donstu.ru");

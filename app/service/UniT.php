@@ -58,7 +58,7 @@ class UniT
     public static function request(
         string $uri,
         array  $data,
-        mixed $user = null,
+        mixed  $user = null,
     ): bool|array|string
     {
         $url = getenv('UNIT_SERVER') . '/' . ltrim($uri, '/');

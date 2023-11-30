@@ -12,7 +12,9 @@
 // return new Triangle\Engine\Container;
 
 // Подключаем сервисы
-$builder = new \DI\ContainerBuilder();
+use DI\ContainerBuilder;
+
+$builder = new ContainerBuilder();
 $builder->addDefinitions(config('dependence', []));
 $builder->useAutowiring(true);
 $builder->useAnnotations(true);

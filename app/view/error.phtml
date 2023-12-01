@@ -1,16 +1,4 @@
-<?php
-
-/**
- * @package     Triangle Web
- * @link        https://github.com/Triangle-org
- *
- * @copyright   2018-2023 Localzet Group
- * @license     https://mit-license.org MIT
- */
-
-use localzet\Server;
-
-?>
+<?php $print = $error ?? $data ?? 'Ошибка'; ?>
 
 <!DOCTYPE html>
 
@@ -18,49 +6,59 @@ use localzet\Server;
 
 <head>
     <base href=""/>
-    <title>Triangle Web</title>
+    <title>Teashka Bot</title>
     <meta charset="utf-8"/>
+
+    <meta name="color-scheme" content="dark light">
+    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#12121200">
+    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff00">
 
     <!-- About App -->
     <meta name="language" content="RU"/>
     <meta name="robots" content="noindex,nofollow"/>
+    <meta name="title" content="Zorin Projects S.P."/>
+    <meta name="description" content="Creative Lab for Internet Development and Research"/>
+    <meta name="keywords" content=""/>
+    <meta name="viewport" content="width=device-width, initial-scale=1"/>
+
+    <!-- Apple Meta Tags -->
+    <meta name="apple-mobile-web-app-capable" content="yes"/>
+    <meta name="apple-touch-fullscreen" content="yes"/>
+    <meta name="apple-mobile-web-app-status-bar-style" content="black"/>
+    <meta name="format-detection" content="telephone=no"/>
+
+    <!-- About Creator App -->
+    <meta name="owner" content="Ivan Zorin"/>
+    <meta name="designer" content="designer@zorin.space"/>
+    <meta name="author" content="Ivan Zorin, ivan@zorin.space"/>
+    <meta name="copyright" content="Zorin Projects S.P."/>
+    <meta name="reply-to" content="support@zorin.space"/>
 
     <!-- About System -->
     <meta name="generator" content="Triangle Framework"/>
-    <meta name="server" version="Localzet Server <?= Server::getVersion() ?? '' ?>"/>
+    <meta name="server" content="Localzet Server"/>
 
     <!-- Cache&Content -->
     <meta http-equiv="Expires" content="60"/>
     <meta http-equiv="Pragma" content="no-cache"/>
     <meta http-equiv="Cache-Control" content="no-cache"/>
-    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta http-equiv="X-UA-Compatible" content="IE=edge"/>
 
     <!-- SEO -->
-    <link rel="shortcut icon" type="image/svg+xml" href="//cdn.localzet.com/public/media/localzet.svg"/>
-
-    <meta name="color-scheme" content="dark light">
-    <meta name="theme-color" media="(prefers-color-scheme: dark)" content="#12121200">
-    <meta name="theme-color" media="(prefers-color-scheme: light)" content="#ffffff00">
+    <link rel="icon" type="image/svg+xml" href="https://cdn.localzet.com/public/media/localzet.svg"/>
+    <link rel="shortcut icon" type="image/svg+xml" href="https://cdn.localzet.com/public/media/localzet.svg"/>
 
     <!-- Fonts -->
     <link rel="stylesheet" type="text/css"
           href="https://fonts.googleapis.com/css?family=Nunito:100,200,300,400,500,600,700,800,900"/>
 
     <style>
-        html {
-            /* height: 100%; */
-        }
-
         body {
-            /* background-color: #0e0e0e; */
             background-color: #000;
-
             font-family: Nunito, monospace;
             font-weight: 600;
-
             text-align: center;
-            text-decoration: none !important;
-
             display: flex;
             flex-direction: column;
             justify-content: center;
@@ -70,63 +68,79 @@ use localzet\Server;
             overflow: hidden;
         }
 
-        center {
-            height: 90vh;
+        main {
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            align-items: center;
+            max-height: 90vh;
             overflow: auto;
+            height: fit-content;
         }
 
-        h1 {
-            font-size: 1.6rem;
-            word-wrap: break-word;
-            width: 90vw;
-            /*height: 90vh;*/
-            /*overflow-y: scroll;*/
-            /*display: inline-block;*/
+
+        main img {
+            display: block;
+            -webkit-user-select: none;
+            transition: background-color 300ms;
+
+            max-width: 300px;
+            width: 300px;
         }
 
-        .footer {
+        main h1 {
+            margin: 0;
+            color: #FF3767;
+            font-size: 3rem;
+        }
+
+        main span {
+            color: #FF7E00;
+            font-size: 1rem;
+            margin-top: -38px;
+        }
+
+        footer {
             position: fixed;
             bottom: 0;
             width: 100%;
-            text-align: center;
             margin-bottom: 5px;
         }
 
-        .footer a {
-            text-decoration: none;
+        footer nav {
+            text-align: center;
+        }
+
+        footer nav a {
+            text-decoration: none !important;
             color: #6e7681;
             margin: 0 3px;
-            /* white-space: nowrap; */
             display: inline-block;
         }
 
-        .footer a b {
-            color: #50cd89;
-        }
-
-        img {
-            display: block;
-            -webkit-user-select: none;
-            /* margin: calc(48vh - 80px) calc(50vw - 400px); */
-            transition: background-color 300ms;
-
-            max-width: 800px;
-
-            width: 800px;
-            /* height: 160px; */
+        footer nav a b {
+            color: #7b69c8;
         }
 
         hr {
-            border-color: #50cd89;
+            border-color: #7b69c8;
             border-radius: 50%;
             width: 100%;
         }
 
-        /* Медиа-запрос для экранов меньше 800px */
-        @media (max-width: 900px) {
-            img {
+        details[open] {
+            text-align: start;
+            width: 90vw;
+        }
+
+        @media (max-width: 600px) {
+            main {
+                margin-top: calc(-50px + -12rem);
+            }
+
+            main img {
                 margin: auto 5%;
-                width: 90%;
+                width: 80%;
                 height: auto;
             }
         }
@@ -134,18 +148,22 @@ use localzet\Server;
 </head>
 
 <body>
-<br/>
-<center>
-    <h1>
-        <?php $print = $error ?? $data ?? 'Ошибка'; ?>
-        <?= is_string($print) ? $print : print_r($print, true) ?>
-    </h1>
-</center>
-<div class="footer">
-    <hr>
-    <a href="https://github.com/localzet/server">Powered by <b>Localzet
-            Server <?= @Server::getVersion() ?? '' ?></b></a>
-</div>
+<main>
+    <img src="https://my.e.donstu.ru/t/assets/media/TDSTU-Security.svg" alt="Zorin Projects S.P.">
+    <h1><?= is_string($print) ? $print : ($print['error'] ?? "~Неизвестный формат~") ?></h1>
+    <?php if (!is_string($print) && @$print['traces']) : ?>
+        <details>
+            <?= $print['traces'] ?>
+        </details>
+    <?php endif; ?>
+</main>
+<footer>
+    <hr/>
+    <nav>
+        <a target="_blank" href="https://t.me/dstu_devs">Created by <b>T-Developers</b></a>
+        <a target="_blank" href="https://github.com/localzet/server">Powered by <b>Localzet Server</b></a>
+    </nav>
+</footer>
 </body>
 
 </html>

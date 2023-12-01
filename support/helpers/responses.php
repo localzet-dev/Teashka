@@ -1,6 +1,7 @@
 <?php
 
 use support\Response;
+use Triangle\Engine\Exception\BusinessException;
 use Triangle\Engine\View\Blade;
 use Triangle\Engine\View\Raw;
 use Triangle\Engine\View\ThinkPHP;
@@ -174,5 +175,5 @@ function twig_view(string $template, array $vars = [], string $app = null): Resp
  */
 function not_found(): Response
 {
-    return response('Ничего не найдено', 404);
+    throw new BusinessException('Ничего не найдено', 404);
 }

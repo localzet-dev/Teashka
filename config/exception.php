@@ -8,8 +8,8 @@
  * @license     https://mit-license.org MIT
  */
 
-use Triangle\Engine\Exception\ExceptionHandler;
+use app\exception\ExceptionHandler;
 
 return [
-    '' => ExceptionHandler::class,
+    '' => ExceptionHandler::class
 ];

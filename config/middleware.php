@@ -9,7 +9,9 @@
  */
 
 use app\middleware\TelegramMiddleware;
+use app\middleware\WebAuthMiddleware;
 
 return [
-    'api' => [TelegramMiddleware::class]
+    'api' => [TelegramMiddleware::class],
+    'auth' => [WebAuthMiddleware::class],
 ];

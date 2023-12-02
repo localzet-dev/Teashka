@@ -4,6 +4,7 @@ namespace app\auth\controller;
 
 use app\model\Attempts;
 use app\model\User;
+use Illuminate\Support\Facades\DB;
 use support\Request;
 use support\Response;
 use Telegram\Bot\Exceptions\TelegramSDKException;
@@ -30,7 +31,6 @@ class Index
         }
 
         $attempt = $user->getAttempt();
-
         $login = $attempt->login;
         $hashedCode = hash_hmac('md5', $login, getenv('SECRET'));
 
@@ -38,18 +38,20 @@ class Index
             throw new BusinessException('Неверный код');
         }
 
-        $user->delAttempt();
+        DB::transaction(function () use ($user, $attempt, $login, $request) {
+            $user->delAttempt();
 
-        foreach (Attempts::byLogin($login) as $err_attempt) {
-            $err_user = User::find($err_attempt->user);
-            $request->telegram->sendMessage("Пользователь ($login) привязал другой аккаунт. Ваша попытка сброшена!", $err_user->id);
-            $err_user->delAttempt();
+            foreach (Attempts::byLogin($login) as $err_attempt) {
+                $err_user = User::find($err_attempt->user);
+                $request->telegram->sendMessage("Пользователь ($login) привязал другой аккаунт. Ваша попытка сброшена!", $err_user->id);
+                $err_user->delAttempt();
 
-            $err_user->state(User::START);
-            $request->telegram->sendMessage("Для использования бота пришли свой E-Mail (логин), привязанный к edu.donstu.ru", $err_user->id);
-        }
+                $err_user->state(User::START);
+                $request->telegram->sendMessage("Для использования бота пришли свой E-Mail (логин), привязанный к edu.donstu.ru", $err_user->id);
+            }
 
-        $user->update(['login' => $login, 'state' => User::DONE]);
+            $user->update(['login' => $login, 'state' => User::DONE]);
+        });
 
         $request->telegram->sendMessage(<<<MESSAGE
         Поздравляю! Твой аккаунт активирован, теперь тебе доступны все функции :)

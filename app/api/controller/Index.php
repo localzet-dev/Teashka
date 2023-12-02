@@ -2,20 +2,16 @@
 
 namespace app\api\controller;
 
-use app\actions\Schedule;
-use app\actions\Settings;
-use app\actions\Support;
-use app\helpers\Voice;
-use app\model\User;
+use app\helpers\AuthHandler;
+use app\helpers\VoiceHandler;
 use app\repositories\Dialogflow;
-use app\service\AuthService;
-use app\service\Telegram;
 use Google\ApiCore\ApiException;
 use Google\ApiCore\ValidationException;
 use support\Request;
 use support\Response;
 use Telegram\Bot\Exceptions\TelegramSDKException;
 use Throwable;
+use Triangle\Engine\Exception\BusinessException;
 
 class Index
 {
@@ -28,57 +24,77 @@ class Index
      */
     public function index(Request $request): Response
     {
-        $user = $request->user;
-        $message = $request->message;
-        $text = $message->text;
-        $chatId = $message->chat->id;
+        // Проверяем состояние пользователя
+        try {
+            AuthHandler::handle($request);
 
-        if ($user->state === User::START) {
-            AuthService::start($request);
-        } elseif ($user->state === User::VERIFY) {
-            AuthService::pending($request);
+            // Получаем/распознаём текст
+            $text = VoiceHandler::handle($request);
+            $text = $text !== null ? $text : $request->message->text;
+
+            $this->handleTextMessage($text, $request);
+
+            if (str_starts_with($text, '/')) {
+                $this->handleCommand($text, $request);
+            } else {
+                $this->handleIntent($text, $request);
+            }
+
+        } catch (BusinessException $exception) {
+            $request->telegram->sendMessage($exception->getMessage(), $request->chat->id);
+        } catch (Throwable) {
+            $request->telegram->sendMessage('Внутренняя ошибка. Пожалуйста, сообщите администрации <a href="https://t.me/dstu_support">@dstu_support</a>', $request->chat->id);
+        } finally {
+            return response('ok');
         }
+    }
 
-        // Загружаем голосовое сообщение из Telegram и распознаем его
-        if ($message->voice) {
-            $voicePath = Telegram::downloadVoice($message);
-            $text = Voice::recognize($voicePath);
-            unlink($voicePath);
+    /**
+     * @param string $text
+     * @param Request $request
+     * @throws BusinessException
+     */
+    private function handleTextMessage(string $text, Request $request): void
+    {
+        switch ($text) {
+            case 'Квиз':
+                throw new BusinessException('Сейчас квиз ещё в разработке :)');
+            case 'Помощь':
+                throw new BusinessException('По всем вопросам обращайтесь к администрации <a href="https://t.me/dstu_support">@dstu_support</a> :)');
         }
-
-        if (str_starts_with($text, '/')) {
-            // Обработка команды
-            $this->handleCommand($text, $chatId);
-        } else {
-            // Обработка текстового сообщения
-            $this->handleTextMessage($text, $chatId);
-        }
-
-        return response();
     }
 
     /**
      * Обрабатывает команду пользователя.
      *
      * @param string $command Команда пользователя.
-     * @param int $chatId Идентификатор чата.
+     * @param Request $request
      * @return void
      * @throws TelegramSDKException
+     * @throws BusinessException
      */
-    private function handleCommand(string $command, int $chatId): void
+
+    private function handleCommand(string $command, Request $request): void
     {
-        switch ($command) {
-            case '/schedule':
-                Schedule::process($chatId);
-                break;
-            // case '/setings':
-            //     Settings::process($chatId);
-            //     break;
-            // case '/support':
-            //     Support::process($chatId);
-            //     break;
-            default:
-                Telegram::sendMessage('Неверная команда. Попробуйте еще раз.');
+        // Убираем первый символ
+        $command = substr($command, 1);
+        $arguments = [];
+
+        // Если у команды есть аргументы - получаем их
+        if (str_contains($command, ' ')) {
+            $arr = explode(' ', $command);
+            $command = $arr[0];
+            $arguments = array_slice($arr, 1);
+        }
+
+        // Формируем полное имя класса
+        $className = '\\app\\actions\\' . ucfirst(strtolower($command));
+
+        // Проверяем существование класса и вызываем метод handleCommand
+        if (class_exists($className) && method_exists($className, 'handleCommand')) {
+            call_user_func([$className, 'handleCommand'], $arguments);
+        } else {
+            throw new BusinessException('Неверная команда. Попробуйте еще раз.');
         }
     }
 
@@ -86,43 +102,29 @@ class Index
      * Обрабатывает текстовое сообщение пользователя.
      *
      * @param string $text Текстовое сообщение пользователя.
-     * @param int $chatId Идентификатор чата.
+     * @param Request $request
      * @return void
-     * @throws ApiException
-     * @throws ValidationException
      * @throws TelegramSDKException
+     * @throws BusinessException
+     * @throws ValidationException
+     * @throws ApiException
      */
-    private function handleTextMessage(string $text, int $chatId): void
+    private function handleIntent(string $text, Request $request): void
     {
-        switch ($text) {
-            case 'Что ты умеешь?':
-                Telegram::sendMessage('По всем вопросам обращайся к @GeneralRust :)');
-                return;
-            case 'Помощь':
-                Telegram::sendMessage('По всем вопросам обращайся к @GeneralRust :)');
-                return;
-            case 'Скоро':
-                Telegram::sendMessage('Скоро я получу обновление и смогу помочь тебе ещё лучше! А пока я могу показать твоё расписание)');
-                return;
-        }
-
         // Обработка текстового сообщения с помощью Dialogflow
-        $result = Dialogflow::process($chatId, $text);
+        $dialogflow = new Dialogflow((string)$request->chat->id);
+        $result = $dialogflow->detectIntent($text);
         $name = $result->getIntent()->getDisplayName();
         $parameters = json_decode($result->getParameters()->serializeToJsonString(), true);
 
-        switch ($name) {
-            case 'Schedule':
-                Schedule::process($chatId, $parameters);
-                break;
-            case 'Settings':
-                Settings::process($chatId);
-                break;
-            case 'Support':
-                Support::process($chatId);
-                break;
-            default:
-                Telegram::sendMessage('Извини, не совсем понимаю, о чём ты');
+        // Формируем полное имя класса
+        $className = '\\app\\actions\\' . ucfirst(strtolower($name));
+
+        // Проверяем существование класса и вызываем метод handleIntent
+        if (class_exists($className) && method_exists($className, 'handleIntent')) {
+            call_user_func([$className, 'handleIntent'], $parameters);
+        } else {
+            throw new BusinessException('Извини, не совсем понимаю, о чём ты');
         }
     }
 }

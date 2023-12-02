@@ -71,7 +71,7 @@ class Telegram
      * @return string Путь к сохраненному голосовому сообщению.
      * @throws Exception Если произошла ошибка при загрузке голосового сообщения.
      */
-    public function downloadVoice(Message $message, int $chat_id): string
+    public function downloadVoice(Message $message): string
     {
         $fileUrl = $this->downloadFile($message->voice->fileId);
         $savePath = base_path("public/voices/{$message->chat->id}_" . basename($fileUrl));
@@ -79,7 +79,7 @@ class Telegram
         try {
             return $this->saveFile($fileUrl, $savePath);
         } catch (Exception $e) {
-            $this->sendMessage("Ошибка загрузки голосового сообщения", $chat_id);
+            $this->sendMessage("Ошибка загрузки голосового сообщения", $message->chat->id);
             throw $e;
         }
     }

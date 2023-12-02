@@ -20,12 +20,12 @@ class WebAuthMiddleware implements MiddlewareInterface
 
         // Проверяем, что параметры не пустые
         if (empty($id) || empty($request->code)) {
-            throw new BusinessException("Некорректный URL");
+            throw new BusinessException('Некорректный URL. Обратитесь к администрации <a href="https://t.me/dstu_support">@dstu_support</a>');
         }
 
         $request->user = User::find($id);
         if (!$request->user) {
-            throw new BusinessException('Ошибка ID. Обратитесь к администратору <a href="https://t.me/GeneralRust">@GeneralRust</a>');
+            throw new BusinessException('Ошибка ID. Обратитесь к администрации <a href="https://t.me/dstu_support">@dstu_support</a>');
         }
 
         return $handler($request);

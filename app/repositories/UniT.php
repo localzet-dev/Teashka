@@ -1,6 +1,6 @@
 <?php
 
-namespace app\service;
+namespace app\repositories;
 
 use Exception;
 use localzet\HTTP\Client;
@@ -16,7 +16,7 @@ class UniT
      * @return array Данные пользователя.
      * @throws Exception В случае ошибки при выполнении запроса.
      */
-    public static function userByLogin($login): array
+    public static function userByLogin(string $login): array
     {
         return self::request('internal/auth/unit/login', ['login' => $login]);
     }
@@ -28,7 +28,7 @@ class UniT
      * @param string $message Текст письма.
      * @throws Exception В случае ошибки при выполнении запроса.
      */
-    public static function eduMailSend($theme, $message): void
+    public static function eduMailSend(string $theme, string $message): void
     {
         self::request('unit/mail/self-send', ['theme' => $theme, 'message' => $message], request()->user->token);
     }

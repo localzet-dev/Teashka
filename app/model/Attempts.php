@@ -4,6 +4,10 @@ namespace app\model;
 
 use Triangle\MongoDB\Model;
 
+/**
+ * @property string $login
+ * @property int $user
+ */
 class Attempts extends Model
 {
     /**

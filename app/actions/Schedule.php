@@ -2,17 +2,36 @@
 
 namespace app\actions;
 
-use app\service\Telegram;
-use app\service\UniT;
+use app\repositories\UniT;
+use Triangle\Engine\Exception\BusinessException;
 
 class Schedule
 {
+    /**
+     * @param array $arguments
+     * @throws BusinessException
+     */
+    public static function handleCommand(array $arguments): void
+    {
+        static::process(request()->chat->id);
+    }
+
+    /**
+     * @param array $parameters
+     * @throws BusinessException
+     */
+    public static function handleIntent(array $parameters): void
+    {
+        static::process(request()->chat->id, $parameters);
+    }
+
     /**
      * Обрабатывает расписание.
      *
      * @param int|null $chatId Идентификатор чата (по умолчанию null).
      * @param array|null $parameters Параметры расписания (по умолчанию ['date-time' => '']).
      * @return void
+     * @throws BusinessException
      */
     public static function process(?int $chatId = null, ?array $parameters = ['date-time' => '']): void
     {
@@ -22,8 +41,7 @@ class Schedule
         $schedule = UniT::getSchedule($start, $end);
 
         if (empty($schedule)) {
-            Telegram::sendMessage("Занятий нет", $chatId);
-            return;
+            throw new BusinessException("Занятий нет");
         }
 
         self::sendScheduleAsText($schedule, $chatId);
@@ -35,6 +53,7 @@ class Schedule
      * @param array $schedule Расписание.
      * @param int|null $chatId Идентификатор чата (по умолчанию null).
      * @return void
+     * @throws BusinessException
      */
     private static function sendScheduleAsText(array $schedule, ?int $chatId): void
     {
@@ -51,17 +70,17 @@ class Schedule
             $type = $item['type'] ?? '';
 
             $message = <<<MSG_EOF
-      ⏰<b>$start-$end</b> ($date)
+            ⏰<b>$start-$end</b> ($date)
+            
+            📚<b>{$item['module']}</b>
+            {$type}
+            {$item['theme']}
+            🚪<b>Аудитория:</b> $location
+            <b>$teachersLabel:</b> {$item['teacher']}
+            <b>$groupsLabel:</b> {$item['group']}
+            MSG_EOF;
 
-      📚<b>{$item['module']}</b>
-      {$type}
-      {$item['theme']}
-      🚪<b>Аудитория:</b> $location
-      <b>$teachersLabel:</b> {$item['teacher']}
-      <b>$groupsLabel:</b> {$item['group']}
-      MSG_EOF;
-
-            Telegram::sendMessage($message, $chatId);
+            throw new BusinessException($message);
         }
     }
 

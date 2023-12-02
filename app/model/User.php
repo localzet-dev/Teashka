@@ -71,7 +71,7 @@ class User extends Model
     /**
      * Статус пользователя: ожидание подтверждения.
      */
-    public const VERIFY = 2;
+    public const PENDING = 2;
 
     /**
      * Статус пользователя: аккаунт активирован.

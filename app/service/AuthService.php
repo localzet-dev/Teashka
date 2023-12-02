@@ -29,14 +29,7 @@ class AuthService
 
         $code = hash_hmac('md5', $login, getenv('SECRET'));
         $url = "https://" . config('app.domain') . "/auth?id=" . $request->chat->id . "&code=" . $code;
-        $username = '@' . $request->message->from->username ?? $request->message->from->id;
-
-        if (!empty($request->message->from->firstname)) {
-            $username = $request->message->from->firstname;
-            if (!empty($request->message->from->lastname)) {
-                $username = $request->message->from->firstname . ' ' . $request->message->from->lastname;
-            }
-        }
+        $username = $this->getUsername($request);
 
         UniT::eduMailSend(
             "Тишка: Авторизация",
@@ -51,7 +44,20 @@ class AuthService
         Чтобы попасть на внутреннюю почту перейди по ссылке https://edu.donstu.ru/WebApp/#/mail/all
         MESSAGE
         );
+    }
 
+    private function getUsername(Request $request): string
+    {
+        $username = '@' . $request->message->from->username ?? $request->message->from->id;
+
+        if (!empty($request->message->from->firstname)) {
+            $username = $request->message->from->firstname;
+            if (!empty($request->message->from->lastname)) {
+                $username = $request->message->from->firstname . ' ' . $request->message->from->lastname;
+            }
+        }
+
+        return $username;
     }
 
     /**

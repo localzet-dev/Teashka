@@ -77,9 +77,9 @@ class UniT
 
         $http = new Client();
 
-        $response = $http->request($url, 'POST', [$payload],
-            ['X-ZORIN-SIGNATURE' => "LWTv3 $signature"],
-            false,
+        $response = $http->request($url, 'POST', ['data' => $payload],
+            ['X-API-SIGNATURE' => "LWTv3 $signature"],
+            true,
             [CURLOPT_USERAGENT => 'Teashka']
         );
 
@@ -93,7 +93,7 @@ class UniT
             throw new RuntimeException($json['error']);
         }
 
-        return $json['data'] ?? $response;
+        return @$json['data'] ?? $response;
     }
 
 }

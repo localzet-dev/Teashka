@@ -18,10 +18,10 @@ class WebAuthMiddleware implements MiddlewareInterface
     {
         // Получаем параметры из запроса
         $id = $request->get('id');
-        $code = $request->get('code');
+        $request->code = $request->get('code');
 
         // Проверяем, что параметры не пустые
-        if (empty($id) || empty($code)) {
+        if (empty($id) || empty($request->code)) {
             throw new BusinessException("Некорректный URL");
         }
 

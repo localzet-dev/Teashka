@@ -151,9 +151,9 @@
 <main>
     <img src="https://my.e.donstu.ru/t/assets/media/TDSTU-Security.svg" alt="Zorin Projects S.P.">
     <h1><?= is_string($print) ? $print : ($print['error'] ?? "~Неизвестный формат~") ?></h1>
-    <?php if (!is_string($print) && @$print['traces']) : ?>
+    <?php if (@$traces) : ?>
         <details>
-            <?= $print['traces'] ?>
+            <?= $traces ?>
         </details>
     <?php endif; ?>
 </main>

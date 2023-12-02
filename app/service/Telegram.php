@@ -6,7 +6,6 @@ use Exception;
 use Telegram\Bot\Api;
 use Telegram\Bot\Events\UpdateWasReceived;
 use Telegram\Bot\Exceptions\TelegramSDKException;
-use Telegram\Bot\FileUpload\InputFile;
 use Telegram\Bot\Objects\Message;
 use Telegram\Bot\Objects\Update;
 use Triangle\Engine\Http\Request;
@@ -40,7 +39,7 @@ class Telegram
      * @return string URL файла.
      * @throws TelegramSDKException
      */
-    public function downloadFile(string $fileId): string
+    private function downloadFile(string $fileId): string
     {
         $filePath = $this->api->getFile(['file_id' => $fileId])->filePath;
         return 'https://api.telegram.org/file/bot' . getenv('TG_TOKEN') . '/' . $filePath;
@@ -54,7 +53,7 @@ class Telegram
      * @return string Путь к сохраненному файлу.
      * @throws Exception Если произошла ошибка при сохранении файла.
      */
-    public function saveFile(string $fileUrl, string $savePath): string
+    private function saveFile(string $fileUrl, string $savePath): string
     {
         $fileContent = file_get_contents($fileUrl);
         if ($fileContent !== false && file_put_contents($savePath, $fileContent) !== false) {
@@ -100,23 +99,6 @@ class Telegram
         ];
 
         $this->api->sendMessage(array_merge($messageData, $options));
-    }
-
-    /**
-     * Отправляет фото через Telegram API.
-     *
-     * @param string $photo Фото.
-     * @param array $options Дополнительные параметры сообщения.
-     * @throws TelegramSDKException
-     */
-    public function sendPhoto(string $photo, int $chat_id, array $options = []): void
-    {
-        $messageData = [
-            'chat_id' => $chat_id,
-            'photo' => InputFile::create($photo),
-        ];
-
-        $this->api->sendPhoto(array_merge($messageData, $options));
     }
 
     /**

@@ -1,5 +1,7 @@
 <?php
 
+use app\actions\Quiz;
+
 return [
-    'Квиз' => \app\actions\Quiz::class,
+    'Квиз' => Quiz::class,
 ];

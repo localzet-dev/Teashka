@@ -8,10 +8,9 @@
  * @license     https://mit-license.org MIT
  */
 
-use support\Request;
 use support\Response;
 use Triangle\Engine\Router;
 
-Router::any('/robots.txt', function (Request $request) {
+Router::any('/robots.txt', function () {
     return new Response(200, [], "User-agent: *\nDisallow: /");
 });

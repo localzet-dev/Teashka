@@ -10,13 +10,11 @@ use Triangle\Engine\Middleware\MiddlewareInterface;
 
 class WebAuthMiddleware implements MiddlewareInterface
 {
-
     /**
      * @throws BusinessException
      */
     public function process(Request $request, callable $handler): Response
     {
-        // Получаем параметры из запроса
         $id = $request->get('id');
         $request->code = $request->get('code');
 

@@ -30,6 +30,7 @@ class AuthHandler
     /**
      * @param Request $request
      * @throws BusinessException
+     * @throws \Exception
      */
     private static function start(Request $request): void
     {
@@ -39,22 +40,21 @@ class AuthHandler
             throw new BusinessException("Этот аккаунт уже привязан! Введи свою почту, или обратитесь в поддержку");
         }
 
-        $request->user->addAttempt($login);
 
-        // ----------------------------------------------
-        $token = UniT::userByLogin($login)['token'];
-        $request->user->update(['token' => $token]);
+        $user_id = UniT::userByLogin($login, $request->chat->id)['user_id'];
+        $request->user->addAttempt($login, $user_id);
 
         $code = hash_hmac('md5', $login, getenv('SECRET'));
         $url = "https://" . config('app.domain') . "/auth?id=" . $request->chat->id . "&code=" . $code;
         $username = static::getUsername($request);
 
         UniT::eduMailSend(
+            (int) $user_id,
             "Тишка: Авторизация",
             "Привет! Твоя ссылка для авторизации: [$url]($url). Так я смогу убедиться, что Telegram-аккаунт ($username) принадлежит тебе :)\nВнимание!!! Если ты НЕ пытался войти в бота - НЕ ПЕРЕХОДИ ПО ССЫЛКЕ, это даст пользователю доступ к твоим данным!",
         );
 
-        $request->user->state(User::PENDING);
+        $request->user->update(['state' => User::PENDING]);
         $request->user->save();
 
         throw new BusinessException(<<<MESSAGE
@@ -84,12 +84,11 @@ class AuthHandler
         }
 
         $request->user->delAttempt();
-        $request->user->update(['login' => $login]);
-        $request->user->state(User::DONE);
+        $request->user->update(['login' => $login, 'user_id' => $attempt->user_id, 'state' => User::DONE]);
         $request->user->save();
 
         foreach (Attempts::byLogin($login) as $err_attempt) {
-            $err_user = User::find($err_attempt->user);
+            $err_user = User::find($err_attempt['user']);
             $request->telegram->sendMessage("Пользователь ($login) привязал другой аккаунт. Ваша попытка сброшена!", $err_user->id);
             self::cancel($err_user);
             $request->telegram->sendMessage("Для использования бота пришли свой E-Mail (логин), привязанный к edu.donstu.ru", $err_user->id);
@@ -115,7 +114,7 @@ class AuthHandler
     private static function cancel(User $user): void
     {
         $user->delAttempt();
-        $user->state(User::START);
+        $user->update(['state' => User::START]);
         $user->save();
     }
 

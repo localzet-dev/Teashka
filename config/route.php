@@ -14,3 +14,34 @@ use Triangle\Engine\Router;
 Router::any('/robots.txt', function () {
     return new Response(200, [], "User-agent: *\nDisallow: /");
 });
+
+Router::any('/df', function (\support\Request $request) {
+    $response = \app\repositories\Cloud::detectIntent($request->input('text'), uniqid());
+
+    return responseJson($response);
+});
+
+Router::any('/whurl', function () {
+    $http = new \localzet\HTTP\Client();
+    $response = $http->request(
+        'https://api.telegram.org/bot' . getenv('TG_TOKEN') .'/setWebhook',
+        'GET',
+        [
+            'url' => 'https://' . config('app.domain') . '/api',
+            'max_connections' => 100,
+            'allowed_updates' => serialize(config('telegram.supported.events')),
+            'secret_token' => getenv('TG_SECRET')
+        ]
+    );
+
+   return responseJson($response);
+});
+
+Router::any('/getwh', function () {
+    $http = new \localzet\HTTP\Client();
+    $response = $http->request(
+        'https://api.telegram.org/bot' . getenv('TG_TOKEN') .'/getWebhookInfo',
+    );
+
+    return responseJson(json_decode($response, true));
+});

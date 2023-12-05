@@ -32,13 +32,14 @@ class Schedule
      * @param array|null $parameters Параметры расписания (по умолчанию ['date-time' => '']).
      * @return void
      * @throws BusinessException
+     * @throws \Exception
      */
     public static function process(?int $chatId = null, ?array $parameters = ['date-time' => '']): void
     {
         $start = self::getStartDateTime($parameters);
         $end = self::getEndDateTime($parameters, $start);
 
-        $schedule = UniT::getSchedule($start, $end);
+        $schedule = UniT::getSchedule(request()->user->user_id, $start, $end);
 
         if (empty($schedule)) {
             throw new BusinessException("Занятий нет");
@@ -53,7 +54,7 @@ class Schedule
      * @param array $schedule Расписание.
      * @param int|null $chatId Идентификатор чата (по умолчанию null).
      * @return void
-     * @throws BusinessException
+     * @throws BusinessException|\Telegram\Bot\Exceptions\TelegramSDKException
      */
     private static function sendScheduleAsText(array $schedule, ?int $chatId): void
     {
@@ -80,7 +81,7 @@ class Schedule
             <b>$groupsLabel:</b> {$item['group']}
             MSG_EOF;
 
-            throw new BusinessException($message);
+            request()->telegram->sendMessage($message, request()->chat->id);
         }
     }
 

@@ -3,6 +3,7 @@
 namespace app\service;
 
 use Exception;
+use support\telegram\GuzzleHttpClient;
 use Telegram\Bot\Api;
 use Telegram\Bot\Events\UpdateWasReceived;
 use Telegram\Bot\Exceptions\TelegramSDKException;
@@ -29,7 +30,7 @@ class Telegram
      */
     public function __construct(string $token, ?int $chatId = null)
     {
-        $this->api = new Api($token);
+        $this->api = new Api($token, false, new GuzzleHttpClient());
     }
 
     /**

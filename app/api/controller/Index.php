@@ -4,9 +4,8 @@ namespace app\api\controller;
 
 use app\helpers\AuthHandler;
 use app\helpers\VoiceHandler;
-use app\repositories\Dialogflow;
-use Google\ApiCore\ApiException;
-use Google\ApiCore\ValidationException;
+use app\repositories\Cloud;
+use Exception;
 use support\Request;
 use support\Response;
 use Telegram\Bot\Exceptions\TelegramSDKException;
@@ -39,10 +38,10 @@ class Index
             } else {
                 $this->handleIntent($text, $request);
             }
-
         } catch (BusinessException $exception) {
             $request->telegram->sendMessage($exception->getMessage(), $request->chat->id);
-        } catch (Throwable) {
+        } catch (Throwable $exception) {
+//             $request->telegram->sendMessage($exception->getMessage(), $request->chat->id);
             $request->telegram->sendMessage('Внутренняя ошибка. Пожалуйста, сообщите администрации <a href="https://t.me/dstu_support">@dstu_support</a>', $request->chat->id);
         } finally {
             return response('ok');
@@ -106,16 +105,15 @@ class Index
      * @return void
      * @throws TelegramSDKException
      * @throws BusinessException
-     * @throws ValidationException
-     * @throws ApiException
+     * @throws Exception
      */
     private function handleIntent(string $text, Request $request): void
     {
-        // Обработка текстового сообщения с помощью Dialogflow
-        $dialogflow = new Dialogflow((string)$request->chat->id);
-        $result = $dialogflow->detectIntent($text);
-        $name = $result->getIntent()->getDisplayName();
-        $parameters = json_decode($result->getParameters()->serializeToJsonString(), true);
+        // Обработка текстового сообщения с помощью Cloud NLP
+        $result = Cloud::detectIntent($text, (string) $request->chat->id);
+
+        $name = $result['intent']['displayName'] ?? '';
+        $parameters = $result['parameters'] ?? [];
 
         // Формируем полное имя класса
         $className = '\\app\\actions\\' . ucfirst(strtolower($name));

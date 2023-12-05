@@ -7,6 +7,7 @@ use Triangle\MongoDB\Model;
 /**
  * @property string $login
  * @property int $user
+ * @property int $user_id
  */
 class Attempts extends Model
 {

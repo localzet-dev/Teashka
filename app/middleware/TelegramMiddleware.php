@@ -5,6 +5,7 @@ namespace app\middleware;
 use app\model\User;
 use app\service\Telegram;
 use Exception;
+use support\Log;
 use Telegram\Bot\Exceptions\TelegramSDKException;
 use Telegram\Bot\Objects\Chat;
 use Telegram\Bot\Objects\Message;
@@ -31,9 +32,10 @@ class TelegramMiddleware implements MiddlewareInterface
     public function process(Request $request, callable $handler): Response
     {
         // Проверяем, является ли запрос запросом от Telegram
-        if (!$this->isTelegramRequest()) {
+        if (!$this->isTelegramRequest($request)) {
             throw new Exception("Неподдерживаемый клиент", 400);
         }
+//        Log::debug((string) $request);
 
         $request->telegram = new Telegram(config('telegram.token'));
         $request->input = $request->telegram->parseInput($request);
@@ -43,7 +45,7 @@ class TelegramMiddleware implements MiddlewareInterface
 
         try {
             $request->message = $this->getMessage($request->input);
-            $request->user = $this->getUser($request->chat);
+            $request->user = $this->getUser($request);
         } catch (BusinessException $error) {
             $request->telegram->sendMessage($error->getMessage(), $request->chat->id);
             return response('ok');
@@ -57,27 +59,31 @@ class TelegramMiddleware implements MiddlewareInterface
      *
      * @return bool Результат проверки.
      */
-    private function isTelegramRequest(): bool
+    private function isTelegramRequest(Request $request): bool
     {
         // TODO: сделать в конфиге отдельное поле для выбора режима: фильтрация по белому списку IP или по заголовку X-Telegram-Bot-Api-Secret-Token
 
-        // Получаем белый список IP-адресов Telegram из конфигурации
-        $whitelist = config('telegram.ips');
+//        // Получаем белый список IP-адресов Telegram из конфигурации
+//        $whitelist = config('telegram.ips');
+//
+//        // Если белый список не определен, считаем, что запрос является запросом от Telegram
+//        if ($whitelist === null) {
+//            return true;
+//        }
+//
+//        // Получаем IP-адрес запроса
+//        $requestIp = getRequestIp();
+//
+//        // Проверяем, принадлежит ли IP-адрес запроса одному из IP-адресов Telegram в белом списке
+//        foreach ($whitelist as $telegramIP) {
+//            $telegramIpCidr = substr($telegramIP, 0, strpos($telegramIP, '/'));
+//            if (ip2long($requestIp) & ip2long($telegramIpCidr)) {
+//                return true;
+//            }
+//        }
 
-        // Если белый список не определен, считаем, что запрос является запросом от Telegram
-        if ($whitelist === null) {
+        if ($request->header('X-Telegram-Bot-Api-Secret-Token') === getenv('TG_SECRET')) {
             return true;
-        }
-
-        // Получаем IP-адрес запроса
-        $requestIp = getRequestIp();
-
-        // Проверяем, принадлежит ли IP-адрес запроса одному из IP-адресов Telegram в белом списке
-        foreach ($whitelist as $telegramIP) {
-            $telegramIpCidr = substr($telegramIP, 0, strpos($telegramIP, '/'));
-            if (ip2long($requestIp) & ip2long($telegramIpCidr)) {
-                return true;
-            }
         }
 
         return false;

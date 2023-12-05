@@ -38,13 +38,13 @@
     "php": "^8.2",
     "ext-curl": "*",
     "ext-posix": "*",
-    "triangle/engine": "^5.0",
+    "triangle/engine": "^5.1",
     "triangle/mongodb": "^1.0",
     "localzet/lwt": "^1.2",
     "localzet/http": "^1.3",
     "vlucas/phpdotenv": "^5.6",
-    "google/cloud-dialogflow": "^1.10",
-    "irazasyed/telegram-bot-sdk": "^3.9"
+    "irazasyed/telegram-bot-sdk": "*",
+    "localzet/jwt": "^1.1"
   },
   "suggest": {
     "ext-simplexml": "For XML Support",
@@ -55,18 +55,18 @@
       "": "./"
     },
     "files": [
-      "support/helpers/autoload.php"
+      "support/helpers.php"
     ]
   },
   "scripts": {
     "post-package-install": [
-      "support\\Plugin::install"
+      "Triangle\\Engine\\Plugin::install"
     ],
     "post-package-update": [
-      "support\\Plugin::update"
+      "Triangle\\Engine\\Plugin::update"
     ],
     "pre-package-uninstall": [
-      "support\\Plugin::uninstall"
+      "Triangle\\Engine\\Plugin::uninstall"
     ]
   }
 }

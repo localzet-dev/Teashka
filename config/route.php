@@ -8,6 +8,7 @@
  * @license     https://mit-license.org MIT
  */
 
+use app\repositories\Cloud;
 use support\Response;
 use Triangle\Engine\Router;
 
@@ -19,6 +20,23 @@ Router::any('/df', function (\support\Request $request) {
     $response = \app\repositories\Cloud::detectIntent($request->input('text'), uniqid());
 
     return responseJson($response);
+});
+
+Router::any('/rasp', function (\support\Request $request) {
+    $response = \app\repositories\UniT::getSchedule(-289081, date('d.m.Y'));
+
+    return responseJson($response);
+});
+
+Router::any('/usr', function (\support\Request $request) {
+    $response = \app\repositories\UniT::userByLogin('ss');
+    Cloud::log((array)$response);
+
+    return responseJson($response);
+});
+
+Router::any('/log', function (\support\Request $request) {
+    return responseJson(Cloud::log(['ss']));
 });
 
 Router::any('/whurl', function () {

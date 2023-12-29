@@ -3,6 +3,7 @@
 namespace app\actions;
 
 use app\repositories\UniT;
+use Telegram\Bot\Exceptions\TelegramSDKException;
 use Triangle\Engine\Exception\BusinessException;
 
 class Schedule
@@ -54,7 +55,7 @@ class Schedule
      * @param array $schedule Расписание.
      * @param int|null $chatId Идентификатор чата (по умолчанию null).
      * @return void
-     * @throws BusinessException|\Telegram\Bot\Exceptions\TelegramSDKException
+     * @throws TelegramSDKException
      */
     private static function sendScheduleAsText(array $schedule, ?int $chatId): void
     {
@@ -68,15 +69,17 @@ class Schedule
             $teachersLabel = str_contains($item['teacher'], ',') ? 'Преподаватели' : 'Преподаватель';
             $groupsLabel = str_contains($item['group'], ',') ? 'Группы' : 'Группа';
             $location = empty($item['link']) ? $item['location'] : "<a href=\"{$item['link']}\">{$item['location']}</a>";
-            $type = $item['type'] ?? '';
+
+            $title = $item['title'] ?? $item['module'];
+            $type = ($item['type'] && $item['type'] != ' ') ? "\n" . $item['type'] : '';
+            $theme = ($item['theme'] && $item['theme'] != ' ') ? "\n" . $item['theme'] : '';
 
             $message = <<<MSG_EOF
             ⏰<b>$start-$end</b> ($date)
             
-            📚<b>{$item['module']}</b>
-            {$type}
-            {$item['theme']}
+            📚<b>{$title}</b>{$type}{$theme}
             🚪<b>Аудитория:</b> $location
+            
             <b>$teachersLabel:</b> {$item['teacher']}
             <b>$groupsLabel:</b> {$item['group']}
             MSG_EOF;

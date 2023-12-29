@@ -43,6 +43,8 @@ class Index
         } catch (Throwable $exception) {
 //             $request->telegram->sendMessage($exception->getMessage(), $request->chat->id);
             $request->telegram->sendMessage('Внутренняя ошибка. Пожалуйста, сообщите администрации <a href="https://t.me/dstu_support">@dstu_support</a>', $request->chat->id);
+            Cloud::log((array)$exception);
+            throw $exception;
         } finally {
             return response('ok');
         }

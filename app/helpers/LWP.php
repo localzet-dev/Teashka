@@ -7,6 +7,7 @@ use localzet\LWT;
 use localzet\JWT;
 use localzet\HTTP\Client;
 use RuntimeException;
+use Triangle\Engine\Exception\BusinessException;
 
 /**
  * Класс Localzet Web Protect
@@ -182,7 +183,11 @@ final class LWP
 
         // Проверка статуса ответа сервера.
         if (is_array($json) && isset($json['status']) && $json['status'] != 200 && isset($json['error'])) {
-            throw new RuntimeException($json['error']);
+            if ($json['status'] == 500) {
+                throw new RuntimeException($json['error']);
+            } else {
+                throw new BusinessException($json['error']);
+            }
         }
 
         // Возвращение данных ответа сервера или полного ответа сервера, если данные отсутствуют.

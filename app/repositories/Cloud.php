@@ -26,6 +26,14 @@ class Cloud
         );
     }
 
+    public static function log(array $data): mixed
+    {
+        return self::request(
+            'log',
+            ['data' => $data]
+        );
+    }
+
     /**
      * Выполняет HTTP-запрос к серверу Cloud.
      *

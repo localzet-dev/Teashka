@@ -14,10 +14,10 @@ class UniT
      * @return array Данные пользователя.
      * @throws Exception В случае ошибки при выполнении запроса.
      */
-    public static function userByLogin(string $login, int $telegram): array
+    public static function userByLogin(string $login, int $telegram = null): array
     {
         return self::request(
-            'user/by-login',
+            'user/bylogin',
             [
                 'login' => $login,
                 'setTelegram' => $telegram
@@ -54,14 +54,14 @@ class UniT
      * @return array Расписание пользователя.
      * @throws Exception В случае ошибки при выполнении запроса.
      */
-    public static function getSchedule(int $user, int|string $start, int|string $end): array
+    public static function getSchedule(int $user, int|string $start, int|string $end = null): mixed
     {
         return self::request(
             'schedule/get',
             [
                 'user' => $user,
-                'start' => strtotime($start),
-                'end' => strtotime($end)
+                'start' => $start,
+                'end' => $end ? $end : null
             ],
         );
     }

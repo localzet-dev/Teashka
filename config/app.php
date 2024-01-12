@@ -41,5 +41,17 @@ return [
         'Access-Control-Allow-Credentials' => 'true',
         'Access-Control-Allow-Methods' => 'OPTIONS, GET, POST',
         'Access-Control-Allow-Headers' => '*',
+
+//        'Referrer-Policy' => 'no-referrer-when-downgrade',
+//        'Content-Security-Policy' => 'default-src \'self\' http: https: ws: wss: data: blob: \'unsafe-inline\'; frame-ancestors \'self\';',
+//        'Permissions-Policy' => 'interest-cohort=()',
+//        'Strict-Transport-Security' => 'max-age=31536000; includeSubDomains; preload',
+//
+//        'Alt-Svc' => 'h3=":443"; ma=2592000,h3-29=":443"; ma=2592000',
+//
+//        'X-Quic' => 'h3',
+//        'X-Frame-Options' => 'SAMEORIGIN',
+//        'X-XSS-Protection' => '1; mode=block',
+//        'X-Content-Type-Options' => 'nosniff',
     ],
 ];

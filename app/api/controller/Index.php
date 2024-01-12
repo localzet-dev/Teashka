@@ -43,7 +43,7 @@ class Index
         } catch (Throwable $exception) {
 //             $request->telegram->sendMessage($exception->getMessage(), $request->chat->id);
             $request->telegram->sendMessage('Внутренняя ошибка. Пожалуйста, сообщите администрации <a href="https://t.me/dstu_support">@dstu_support</a>', $request->chat->id);
-            Cloud::log((array)$exception);
+            Cloud::log('ERROR', $exception->getMessage(), ['exception' => (string)$exception, 'exception_arr' => (array)$exception]);
             throw $exception;
         } finally {
             return response('ok');
@@ -112,7 +112,7 @@ class Index
     private function handleIntent(string $text, Request $request): void
     {
         // Обработка текстового сообщения с помощью Cloud NLP
-        $result = Cloud::detectIntent($text, (string) $request->chat->id);
+        $result = Cloud::detectIntent($text, (string)$request->chat->id);
 
         $name = $result['intent']['displayName'] ?? '';
         $parameters = $result['parameters'] ?? [];

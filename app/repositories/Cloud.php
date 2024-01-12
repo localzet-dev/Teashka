@@ -26,11 +26,15 @@ class Cloud
         );
     }
 
-    public static function log(array $data): mixed
+    public static function log(string $level, string $message, array $context = []): mixed
     {
         return self::request(
-            'log',
-            ['data' => $data]
+            'log/Teashka',
+            ['data' => [
+                'level' => $level,
+                'message' => $message,
+                'context' => $context,
+            ]]
         );
     }
 

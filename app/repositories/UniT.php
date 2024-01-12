@@ -20,7 +20,7 @@ class UniT
             'user/bylogin',
             [
                 'login' => $login,
-                'setTelegram' => $telegram
+                'set_teashka_tg' => $telegram
             ]
         );
     }

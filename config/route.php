@@ -16,6 +16,11 @@ Router::any('/robots.txt', function () {
     return new Response(200, [], "User-agent: *\nDisallow: /");
 });
 
+
+Router::any('/headers.json', function () {
+    return responseJson(request()->header());
+});
+
 Router::any('/df', function (\support\Request $request) {
     $response = \app\repositories\Cloud::detectIntent($request->input('text'), uniqid());
 
@@ -28,15 +33,8 @@ Router::any('/rasp', function (\support\Request $request) {
     return responseJson($response);
 });
 
-Router::any('/usr', function (\support\Request $request) {
-    $response = \app\repositories\UniT::userByLogin('ss');
-    Cloud::log((array)$response);
-
-    return responseJson($response);
-});
-
 Router::any('/log', function (\support\Request $request) {
-    return responseJson(Cloud::log(['ss']));
+    return responseJson(Cloud::log('DEBUG', 'Teashka Test'));
 });
 
 Router::any('/whurl', function () {
@@ -62,4 +60,8 @@ Router::any('/getwh', function () {
     );
 
     return responseJson(json_decode($response, true));
+});
+
+Router::any('/', function (\support\Request $request) {
+    return response('Система работает в штатном режиме');
 });

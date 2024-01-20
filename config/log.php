@@ -16,11 +16,18 @@ return [
                 'constructor' => [
                     runtime_path() . '/logs/framex.log',
                     7, //$maxFiles
-                    Monolog\Logger::DEBUG,
+                    Monolog\Logger::WARNING,
                 ],
                 'formatter' => [
                     'class' => Monolog\Formatter\LineFormatter::class,
                     'constructor' => [null, 'Y-m-d H:i:s', true],
+                ],
+            ],
+            [
+                'class' => \support\CloudLogger::class,
+                'constructor' => [
+                    'Teashka',
+                    Monolog\Logger::DEBUG,
                 ],
             ]
         ],
@@ -36,21 +43,5 @@ return [
 //                'constructor' => [10, false],
 //            ],
 //        ]
-    ],
-    'http' => [
-        'handlers' => [
-            [
-                'class' => Monolog\Handler\RotatingFileHandler::class,
-                'constructor' => [
-                    runtime_path() . '/logs/http.log',
-                    7, //$maxFiles
-                    Monolog\Logger::DEBUG,
-                ],
-                'formatter' => [
-                    'class' => Monolog\Formatter\LineFormatter::class,
-                    'constructor' => [null, 'Y-m-d H:i:s', true],
-                ],
-            ]
-        ],
     ],
 ];

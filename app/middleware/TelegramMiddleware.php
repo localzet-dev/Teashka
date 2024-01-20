@@ -35,23 +35,34 @@ class TelegramMiddleware implements MiddlewareInterface
         if (!$this->isTelegramRequest($request)) {
             throw new Exception("Неподдерживаемый клиент", 400);
         }
-//        Log::debug((string) $request);
 
-        $request->telegram = new Telegram(config('telegram.token'));
-        $request->input = $request->telegram->parseInput($request);
-
-        $request->type = $this->getType($request->input);
-        $request->chat = $this->getChat($request->input);
+        Log::debug('Запрос от Telegram', $request->toArray());
 
         try {
-            $request->message = $this->getMessage($request->input);
-            $request->user = $this->getUser($request);
-        } catch (BusinessException $error) {
-            $request->telegram->sendMessage($error->getMessage(), $request->chat->id);
-            return response('ok');
+            $request->telegram = new Telegram(config('telegram.token'));
+            $request->input = $request->telegram->parseInput($request);
+
+            $request->type = $this->getType($request->input);
+            $request->chat = $this->getChat($request->input);
+
+            try {
+                $request->message = $this->getMessage($request->input);
+                $request->user = $this->getUser($request);
+            } catch (BusinessException $error) {
+                $request->telegram->sendMessage($error->getMessage(), $request->chat->id);
+                return response('ok');
+            }
+
+            /** @var Response $response */
+            $response = $handler($request);
+        } catch (Throwable $exception) {
+            Log::error($exception->getMessage(), ['exception' => (string)$exception, 'exception_arr' => (array)$exception]);
+            throw $exception;
         }
 
-        return $handler($request);
+        Log::debug('Ответ для Telegram', ['body' => $response->rawBody()]);
+
+        return $response;
     }
 
     /**

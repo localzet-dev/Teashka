@@ -2,8 +2,8 @@
 
 namespace app\repositories;
 
-use app\helpers\LWP;
 use Exception;
+use support\protocols\LWP;
 
 class UniT
 {
@@ -79,7 +79,7 @@ class UniT
         array  $data,
     ): bool|array|string
     {
-        return LWP::requestV3(
+        return LWP::request(
             getenv('UNIT_SERVER') . ltrim($uri, '/'),
             $data,
             'Teashka',

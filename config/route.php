@@ -34,7 +34,8 @@ Router::any('/rasp', function (\support\Request $request) {
 });
 
 Router::any('/log', function (\support\Request $request) {
-    return responseJson(Cloud::log('DEBUG', 'Teashka Test'));
+    \support\Log::error('Teashka log is work!', ['hello' => 'world']);
+    return responseJson('Ну допустим, мяу!');
 });
 
 Router::any('/whurl', function () {

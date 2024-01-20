@@ -21,14 +21,14 @@ return [
     'controller_reuse' => false,
 
     'domain' => 'teashka.zorin.space',
-    'src' => 'https://cdn.localzet.com/public/',
+    'src' => 'https://cdn.localzet.com/',
 
     'name' => 'Teashka',
     'description' => 'Telegram-бот помощник студента',
     'keywords' => 'localzet, localzet-dev, Triangle, Teashka, DSTU',
 
-    'logo' => 'https://cdn.localzet.com/public/media/teashka/smile.png',
-    'og_image' => 'https://cdn.localzet.com/public/media/general.svg',
+    'logo' => 'https://cdn.localzet.com/media/teashka/smile.png',
+    'og_image' => 'https://cdn.localzet.com/media/general.svg',
 
     'owner' => 'Ivan Zorin <creator@localzet.com>',
     'author' => 'Ivan Zorin <ivan@zorin.space>',

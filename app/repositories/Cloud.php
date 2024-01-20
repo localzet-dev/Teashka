@@ -2,8 +2,8 @@
 
 namespace app\repositories;
 
-use app\helpers\LWP;
 use Exception;
+use support\protocols\LWP;
 
 class Cloud
 {
@@ -26,18 +26,6 @@ class Cloud
         );
     }
 
-    public static function log(string $level, string $message, array $context = []): mixed
-    {
-        return self::request(
-            'log/Teashka',
-            ['data' => [
-                'level' => $level,
-                'message' => $message,
-                'context' => $context,
-            ]]
-        );
-    }
-
     /**
      * Выполняет HTTP-запрос к серверу Cloud.
      *
@@ -51,7 +39,7 @@ class Cloud
         array  $data,
     ): bool|array|string
     {
-        return LWP::requestV3(
+        return LWP::request(
             getenv('CLOUD_SERVER') . ltrim($uri, '/'),
             $data,
             'Teashka',

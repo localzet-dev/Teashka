@@ -39,7 +39,7 @@ class AuthHandler
         $login = trim($request->message->text);
 
         if (User::isRegistered($login)) {
-            throw new BusinessException("Этот аккаунт уже привязан! Введи свою почту, или обратитесь в поддержку");
+            throw new BusinessException("Этот аккаунт уже привязан! Введи свою почту, или обратись в поддержку");
         }
 
 
@@ -91,7 +91,7 @@ class AuthHandler
 
         foreach (Attempts::byLogin($login) as $err_attempt) {
             $err_user = User::find($err_attempt['user']);
-            $request->telegram->sendMessage("Пользователь ($login) привязал другой аккаунт. Ваша попытка сброшена!", $err_user->id);
+            $request->telegram->sendMessage("Пользователь ($login) привязал другой аккаунт. Твоя попытка сброшена!", $err_user->id);
             self::cancel($err_user);
             $request->telegram->sendMessage("Для использования бота пришли свой E-Mail (логин), привязанный к edu.donstu.ru", $err_user->id);
         }

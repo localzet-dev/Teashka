@@ -40,10 +40,11 @@ class Index
                 $this->handleIntent($text, $request);
             }
         } catch (BusinessException $exception) {
+            Log::error($exception->getMessage(), ['exception' => (string)$exception]);
             $request->telegram->sendMessage($exception->getMessage(), $request->chat->id);
         } catch (Throwable $exception) {
-            $request->telegram->sendMessage('Внутренняя ошибка. Пожалуйста, сообщи администрации <a href="https://t.me/dstu_support">@dstu_support</a>', $request->chat->id);
-            Log::error($exception->getMessage(), ['exception' => (string)$exception, 'exception_arr' => (array)$exception]);
+            Log::critical($exception->getMessage(), ['exception' => (string)$exception]);
+            $request->telegram->sendMessage('Внутренняя ошибка. Пожалуйста, сообщите администрации <a href="https://t.me/dstu_support">@dstu_support</a>', $request->chat->id);
             throw $exception;
         } finally {
             return response('ok');

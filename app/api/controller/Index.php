@@ -59,8 +59,6 @@ class Index
     private function handleTextMessage(string $text, Request $request): void
     {
         switch ($text) {
-            case 'Квиз':
-                throw new BusinessException('Сейчас квиз ещё в разработке :)');
             case 'Помощь':
                 throw new BusinessException('По всем вопросам обращайтесь к администрации <a href="https://t.me/dstu_support">@dstu_support</a> :)');
         }

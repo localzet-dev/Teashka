@@ -5,6 +5,7 @@ namespace app\helpers;
 use app\model\Attempts;
 use app\model\User;
 use app\repositories\UniT;
+use Exception;
 use support\Request;
 use Telegram\Bot\Exceptions\TelegramSDKException;
 use Triangle\Engine\Exception\BusinessException;
@@ -14,6 +15,7 @@ class AuthHandler
     /**
      * @param $request
      * @throws BusinessException
+     * @throws Exception
      */
     public static function handle($request): void
     {
@@ -30,7 +32,7 @@ class AuthHandler
     /**
      * @param Request $request
      * @throws BusinessException
-     * @throws \Exception
+     * @throws Exception
      */
     private static function start(Request $request): void
     {

@@ -2,7 +2,7 @@
 
 namespace app\model;
 
-use Triangle\MongoDB\Model;
+use MongoDB\Laravel\Eloquent\Model;
 
 /**
  * @property string $login

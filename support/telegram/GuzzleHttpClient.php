@@ -75,7 +75,8 @@ class GuzzleHttpClient implements HttpClientInterface
         array $headers = [],
         array $options = [],
         $isAsyncRequest = false
-    ) {
+    ): PromiseInterface|ResponseInterface|null
+    {
         $body = $options['body'] ?? null;
         $options = $this->getOptions($headers, $body, $options, $isAsyncRequest);
 
@@ -144,7 +145,7 @@ class GuzzleHttpClient implements HttpClientInterface
     /**
      * {@inheritdoc}
      */
-    public function setTimeOut($timeOut): self
+    public function setTimeOut($timeOut): static
     {
         $this->timeOut = $timeOut;
 
@@ -162,7 +163,7 @@ class GuzzleHttpClient implements HttpClientInterface
     /**
      * {@inheritdoc}
      */
-    public function setConnectTimeOut($connectTimeOut): self
+    public function setConnectTimeOut($connectTimeOut): static
     {
         $this->connectTimeOut = $connectTimeOut;
 

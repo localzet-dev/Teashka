@@ -5,7 +5,6 @@ namespace app\service;
 use Exception;
 use support\telegram\GuzzleHttpClient;
 use Telegram\Bot\Api;
-use Telegram\Bot\Events\UpdateWasReceived;
 use Telegram\Bot\Exceptions\TelegramSDKException;
 use Telegram\Bot\Objects\Message;
 use Telegram\Bot\Objects\Update;
@@ -113,7 +112,7 @@ class Telegram
         $body = json_decode($request->rawBody(), true);
         $update = new Update($body);
 
-        $this->api->emitEvent(new UpdateWasReceived($update, $this->api));
+        $this->api->dispatchUpdateEvent($update);
 
         return $update;
     }

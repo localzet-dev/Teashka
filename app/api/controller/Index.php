@@ -42,7 +42,7 @@ class Index
         } catch (BusinessException $exception) {
             $request->telegram->sendMessage($exception->getMessage(), $request->chat->id);
         } catch (Throwable $exception) {
-            $request->telegram->sendMessage('Внутренняя ошибка. Пожалуйста, сообщите администрации <a href="https://t.me/dstu_support">@dstu_support</a>', $request->chat->id);
+            $request->telegram->sendMessage('Внутренняя ошибка. Пожалуйста, сообщи администрации <a href="https://t.me/dstu_support">@dstu_support</a>', $request->chat->id);
             Log::error($exception->getMessage(), ['exception' => (string)$exception, 'exception_arr' => (array)$exception]);
             throw $exception;
         } finally {
@@ -59,7 +59,7 @@ class Index
     {
         switch ($text) {
             case 'Помощь':
-                throw new BusinessException('По всем вопросам обращайтесь к администрации <a href="https://t.me/dstu_support">@dstu_support</a> :)');
+                throw new BusinessException('По всем вопросам обращайся к администрации <a href="https://t.me/dstu_support">@dstu_support</a> :)');
         }
     }
 
@@ -93,7 +93,7 @@ class Index
         if (class_exists($className) && method_exists($className, 'handleCommand')) {
             call_user_func([$className, 'handleCommand'], $arguments);
         } else {
-            throw new BusinessException('Неверная команда. Попробуйте еще раз.');
+            throw new BusinessException('Неверная команда. Попробуй еще раз.');
         }
     }
 

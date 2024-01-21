@@ -23,12 +23,12 @@ class WebAuthMiddleware implements MiddlewareInterface
 
         // Проверяем, что параметры не пустые
         if (empty($id) || empty($request->code)) {
-            throw new BusinessException('Некорректный URL. Обратитесь к администрации <a href="https://t.me/dstu_support">@dstu_support</a>');
+            throw new BusinessException('Некорректный URL. Обратись за помощью к администрации <a href="https://t.me/dstu_support">@dstu_support</a>');
         }
 
         $request->user = User::find((int) $id);
         if (!$request->user) {
-            throw new BusinessException('Ошибка ID. Обратитесь к администрации <a href="https://t.me/dstu_support">@dstu_support</a>');
+            throw new BusinessException('Ошибка ID. Обратись за помощью к администрации <a href="https://t.me/dstu_support">@dstu_support</a>');
         }
 
         $request->telegram = new Telegram(config('telegram.token'));

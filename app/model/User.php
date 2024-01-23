@@ -83,12 +83,6 @@ class User extends Model
         return static::where(['login' => $login])->exists();
     }
 
-//    public function state(int $state): bool
-//    {
-//        return $this->update(['state' => $state]);
-//    }
-
-
     public function addAttempt(string $login, int $user_id): void
     {
         Attempts::updateOrCreate(['user' => $this->id], ['login' => $login, 'user_id' => $user_id]);

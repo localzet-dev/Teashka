@@ -7,6 +7,7 @@ use localzet\HTTP\Client;
 use localzet\JWT;
 use localzet\LWT;
 use RuntimeException;
+use support\Log;
 use Throwable;
 use Triangle\Engine\Exception\BusinessException;
 use Triangle\Engine\Exception\InvalidAccessException;
@@ -101,6 +102,10 @@ class LWP
             false,
             [CURLOPT_USERAGENT => $agent]
         );
+
+        if (!str_contains($url, 'https://cloud.zorin.space/engine/v1/log/')) {
+            Log::debug("LWP::$url", ['$response' => $response]);
+        }
 
         if ($response === false) {
             throw new RuntimeException('Не могу подключиться к серверу: ' . $http->getResponseClientError());

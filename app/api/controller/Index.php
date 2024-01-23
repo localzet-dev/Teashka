@@ -44,13 +44,12 @@ class Index
             $request->telegram->sendMessage($exception->getMessage(), $request->chat->id);
         } catch (Throwable $exception) {
             Log::critical($exception->getMessage(), ['exception' => (string)$exception]);
-            $request->telegram->sendMessage('Внутренняя ошибка. Пожалуйста, сообщите администрации <a href="https://t.me/dstu_support">@dstu_support</a>', $request->chat->id);
+            $request->telegram->sendMessage('Внутренняя ошибка. Пожалуйста, сообщи администрации <a href="https://t.me/dstu_support">@dstu_support</a>', $request->chat->id);
             throw $exception;
         } finally {
             return response('ok');
         }
     }
-
     /**
      * @param string $text
      * @param Request $request
@@ -63,7 +62,6 @@ class Index
                 throw new BusinessException('По всем вопросам обращайся к администрации <a href="https://t.me/dstu_support">@dstu_support</a> :)');
         }
     }
-
     /**
      * Обрабатывает команду пользователя.
      *
@@ -73,7 +71,6 @@ class Index
      * @throws TelegramSDKException
      * @throws BusinessException
      */
-
     private function handleCommand(string $command, Request $request): void
     {
         // Убираем первый символ
@@ -97,7 +94,6 @@ class Index
             throw new BusinessException('Неверная команда. Попробуй еще раз.');
         }
     }
-
     /**
      * Обрабатывает текстовое сообщение пользователя.
      *

@@ -32,9 +32,9 @@ class TelegramMiddleware implements MiddlewareInterface
     public function process(Request $request, callable $handler): Response
     {
         // Проверяем, является ли запрос запросом от Telegram
-//        if (!$this->isTelegramRequest($request)) {
-//            throw new Exception("Неподдерживаемый клиент", 400);
-//        }
+        if (!$this->isTelegramRequest($request)) {
+            throw new Exception("Неподдерживаемый клиент", 400);
+        }
 
         Log::debug('Запрос от Telegram', $request->toArray());
 

@@ -24,9 +24,12 @@ return [
                 ],
             ],
             [
-                'class' => \support\CloudLogger::class,
+                'class' => \localzet\Utils\Log\ZorinCloudLogger::class,
                 'constructor' => [
-                    'Teashka',
+                    getenv('CLOUD_AGENT'),
+                    getenv('CLOUD_SERVER'),
+                    file_get_contents(base_path(getenv('CLOUD_SECURITY_ENCRYPTION'))),
+                    file_get_contents(base_path(getenv('CLOUD_SECURITY_SIGNATURE'))),
                     Monolog\Logger::DEBUG,
                 ],
             ]

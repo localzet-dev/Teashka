@@ -134,8 +134,7 @@ class Telegram
     public function parseInput(Request $request): Update
     {
         $body = json_decode($request->rawBody(), true);
-        $update = new Update($body);
-
+        $update = new Update(json_decode($request->rawBody(), true));
         $this->api->dispatchUpdateEvent($update);
 
         return $update;
